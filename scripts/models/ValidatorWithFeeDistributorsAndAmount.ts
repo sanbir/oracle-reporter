@@ -1,4 +1,4 @@
-export interface FeeDistributorValidatorWithAmount {
+export interface ValidatorWithFeeDistributorsAndAmount {
     feeDistributor: string
     pubkey: string
     val_id: number

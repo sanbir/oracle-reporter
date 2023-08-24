@@ -19,7 +19,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "generate": "ts-node generate-report.ts",
+    "generate-report": "ts-node generate-report.ts",
+    "print-amounts-for-pubkeys": "ts-node print-amounts-for-pubkeys.ts",
     "start": "ts-node index.ts"
   }
 }
