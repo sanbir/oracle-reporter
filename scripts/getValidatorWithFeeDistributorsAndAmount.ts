@@ -6,7 +6,17 @@ import {ValidatorWithFeeDistributorsAndAmount} from "./models/ValidatorWithFeeDi
 export async function getValidatorWithFeeDistributorsAndAmount() {
     const proposers = await getProposers()
     const pubkeys = Object.keys(proposers)
-    const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
+
+    const chuckSize = 10
+    const pubkeysWithIndexes: {val_id: number, val_pubkey: string}[] = []
+    for (let i = 0; i < pubkeys.length; i++) {
+        if (i % chuckSize === 0) {
+            const chuck = pubkeys.slice(i, i + chuckSize)
+            const pubkeysWithIndexesChunk = await getValidatorIndexesFromBigQuery(chuck)
+            pubkeysWithIndexes.push(...pubkeysWithIndexesChunk)
+        }
+    }
+
     const val_ids = pubkeysWithIndexes.map(r => r.val_id)
     const indexesWithAmounts = await getRowsFromBigQuery(val_ids)
 
