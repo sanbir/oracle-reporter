@@ -3,6 +3,7 @@ import {getValidatorIndexesFromBigQuery} from "./getValidatorIndexesFromBigQuery
 import {getRowsFromBigQuery} from "./getRowsFromBigQuery";
 import {ValidatorWithFeeDistributorsAndAmount} from "./models/ValidatorWithFeeDistributorsAndAmount";
 import {logger} from "./helpers/logger";
+import {ethers} from "ethers";
 
 export async function getValidatorWithFeeDistributorsAndAmount() {
     logger.info('getValidatorWithFeeDistributorsAndAmount started')
@@ -40,7 +41,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
         }
 
         validatorWithFeeDistributorsAndAmounts.push({
-            feeDistributor: proposers[pubkeys[i]].fee_recipient,
+            feeDistributor: ethers.utils.getAddress(proposers[pubkeys[i]].fee_recipient),
             pubkey: pubkeys[i],
             val_id,
             amount

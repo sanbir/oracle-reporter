@@ -36,20 +36,29 @@ export async function withdrawOneOracle(feeDistributorAddress: string, tree: Sta
 
     // @ts-ignore
     const entryPointContract = new ethers.Contract(entryPointAddress, entryPointAbi, provider)
-    const calldata = new ethers.utils.Interface(feeDistributorAbi)
-        .encodeFunctionData('withdraw', [proof, amountInGwei]);
+
+    let iface = new ethers.utils.Interface(feeDistributorAbi);
+    const calldata = iface.encodeFunctionData('withdraw', [proof, amountInGwei]);
+
+    const sender = feeDistributorAddress;
     const nonce = (await entryPointContract.getNonce(feeDistributorAddress, 0)).toNumber();
 
+    const callGasLimit = '100000';
+    const verificationGasLimit = '100000';
+    const preVerificationGas = '100000';
+    const maxFeePerGas = '200000000000';
+    const maxPriorityFeePerGas = '1000000000';
+
     const userOp = {
-        sender: feeDistributorAddress,
+        sender,
         nonce,
         initCode: '0x',
         callData: calldata,
-        callGasLimit: '100000',
-        verificationGasLimit: '100000',
-        preVerificationGas: '100000',
-        maxFeePerGas: process.env.MAX_FEE_PER_GAS,
-        maxPriorityFeePerGas: process.env.MAX_PIORITY_FEE_PER_GAS,
+        callGasLimit: callGasLimit,
+        verificationGasLimit: verificationGasLimit,
+        preVerificationGas: preVerificationGas,
+        maxFeePerGas: maxFeePerGas,
+        maxPriorityFeePerGas: maxPriorityFeePerGas,
         paymasterAndData: "0x",
         signature: "0x"
     }
