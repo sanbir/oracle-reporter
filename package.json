@@ -15,12 +15,17 @@
     "log4js": "6.9.1",
     "prettier": "2.5.1",
     "ts-node": "10.7.0",
-    "typescript": "4.6.3"
+    "typescript": "4.6.3",
+    "@openzeppelin/merkle-tree": "1.0.2"
   },
   "scripts": {
     "build": "tsc",
     "generate-report": "ts-node generate-report.ts",
-    "print-amounts-for-pubkeys": "ts-node print-amounts-for-pubkeys.ts",
+    "01-amounts-for-pubkeys": "ts-node 01-amounts-for-pubkeys.ts",
+    "02-fee-distributors-with-amounts": "ts-node 02-fee-distributors-with-amounts.ts",
+    "03-merkle-tree": "ts-node 03-merkle-tree.ts",
+    "04-report-root-to-oracle-contract.ts": "ts-node 04-report-root-to-oracle-contract.ts",
+    "05-withdraw": "ts-node 05-withdraw.ts",
     "start": "ts-node index.ts"
   }
 }

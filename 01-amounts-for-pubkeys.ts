@@ -1,15 +1,18 @@
 import "dotenv/config"
 import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWithFeeDistributorsAndAmount";
 import {logger} from "./scripts/helpers/logger";
+import fs from "fs";
 
 async function main() {
-    logger.info('print-amounts-for-pubkeys started')
+    logger.info('01-amounts-for-pubkeys started')
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
 
-    logger.info('Results:')
-    validatorWithFeeDistributorsAndAmounts.forEach(console.log)
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/amounts-for-pubkeys' + new Date() + '.json'
+    logger.info('Saving report to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(validatorWithFeeDistributorsAndAmounts))
+    logger.info('Report saved')
 
-    logger.info('print-amounts-for-pubkeys finished')
+    logger.info('01-amounts-for-pubkeys finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -1,14 +1,15 @@
 import "dotenv/config"
-import {logger} from "./scripts/helpers/logger";
-import fs from "fs"
-import {getProposers} from "./scripts/getProposers";
-import {getValidatorIndexesFromBigQuery} from "./scripts/getValidatorIndexesFromBigQuery";
-import {getRowsFromBigQuery} from "./scripts/getRowsFromBigQuery";
-import {ValidatorWithFeeDistributorsAndAmount} from "./scripts/models/ValidatorWithFeeDistributorsAndAmount";
 import {FeeDistributorWithAmount} from "./scripts/models/FeeDistributorWithAmount";
 import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWithFeeDistributorsAndAmount";
+import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMerkleTreeForFeeDistributorAddress";
+import {logger} from "./scripts/helpers/logger";
+import fs from "fs";
+import {makeOracleReport} from "./scripts/makeOracleReport";
+import {withdrawAll} from "./scripts/withdrawAll";
 
 async function main() {
+    logger.info('05-withdraw started')
+
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
 
     const feeDistributorsWithAmounts = validatorWithFeeDistributorsAndAmounts.reduce((
@@ -33,17 +34,24 @@ async function main() {
         return accumulator;
     }, [])
 
-    // const rewardDataPromises = feeDistributors.map(async fd => {
-    //     const amount = await getClRewards(fd)
-    //     return [fd, amount.toString()]
-    // })
-    // const rewardData = await Promise.all(rewardDataPromises)
-    // const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
-    // await makeOracleReport('0xe3c1E6958da770fBb492f8b6B85ea00ABb81E8f9', tree.root)
-    // // // Send tree.json file to the website and to the withdrawer
-    // fs.writeFileSync("tree.json", JSON.stringify(tree.dump()));
-    //
-    // await withdrawAll(feeDistributorFactoryAddress)
+    const rewardData = feeDistributorsWithAmounts.map(fd => {
+        return [fd.feeDistributor, fd.amount.toString()]
+    })
+
+    const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
+
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date() + '.json'
+    logger.info('Saving merkle tree to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
+    logger.info('Merkle tree saved')
+
+    await makeOracleReport(tree.root)
+    logger.info('Root reported to the contract: ' + tree.root)
+
+    const feeDistributorFactoryAddress = feeDistributorsWithAmounts.map(fd => fd.feeDistributor)
+    await withdrawAll(feeDistributorFactoryAddress, tree)
+
+    logger.info('05-withdraw finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere
