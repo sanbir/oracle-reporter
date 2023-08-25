@@ -2,12 +2,17 @@ import {getProposers} from "./getProposers";
 import {getValidatorIndexesFromBigQuery} from "./getValidatorIndexesFromBigQuery";
 import {getRowsFromBigQuery} from "./getRowsFromBigQuery";
 import {ValidatorWithFeeDistributorsAndAmount} from "./models/ValidatorWithFeeDistributorsAndAmount";
+import {logger} from "./helpers/logger";
 
 export async function getValidatorWithFeeDistributorsAndAmount() {
+    logger.info('getValidatorWithFeeDistributorsAndAmount started')
+
     const proposers = await getProposers()
     const pubkeys = Object.keys(proposers)
 
-    const chuckSize = 10
+    logger.info(pubkeys.length + ' pubkeys found')
+
+    const chuckSize = 10000
     const pubkeysWithIndexes: {val_id: number, val_pubkey: string}[] = []
     for (let i = 0; i < pubkeys.length; i++) {
         if (i % chuckSize === 0) {
@@ -24,12 +29,14 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
     for (let i = 0; i < pubkeys.length; i++) {
         const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkeys[i])?.val_id
         if (!val_id) {
-            throw new Error('val_id not found for ' + pubkeys[i])
+            logger.info('val_id not found for ' + pubkeys[i])
+            continue
         }
 
         const amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
         if (!amount) {
-            throw new Error('amount not found for ' + pubkeys[i])
+            logger.info('amount not found for ' + pubkeys[i])
+            continue
         }
 
         validatorWithFeeDistributorsAndAmounts.push({
@@ -39,6 +46,12 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
             amount
         })
     }
+
+    logger.info(
+        'getValidatorWithFeeDistributorsAndAmount finished with '
+        + validatorWithFeeDistributorsAndAmounts.length
+        + ' validators'
+    )
 
     return validatorWithFeeDistributorsAndAmounts
 }

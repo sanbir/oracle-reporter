@@ -1,12 +1,13 @@
 import {BigQuery} from "@google-cloud/bigquery";
+import {logger} from "./helpers/logger";
 
 export async function getValidatorIndexesFromBigQuery(val_pubkeys: string[]): Promise<{val_id: number, val_pubkey: string}[]> {
-    console.log('Getting indexes from BigQuery....')
+    logger.info('Getting indexes from BigQuery for ' + val_pubkeys.length + ' pubkeys')
 
     const bigquery = new BigQuery()
 
     const query = `
-        SELECT val_id, val_pubkey FROM \`p2p-data-warehouse.raw_ethereum.validators_index\`
+        SELECT val_id, val_pubkey FROM \`p2p-data-warehouse.raw_ethereum.${process.env.IS_TESTNET ? 'testnet_' : ''}validators_index\`
         WHERE val_pubkey IN (${"'" + val_pubkeys.join("','") + "'"})
     `
 
@@ -16,6 +17,7 @@ export async function getValidatorIndexesFromBigQuery(val_pubkeys: string[]): Pr
     })
     const [rows] = await job.getQueryResults()
 
-    console.log('Indexes from BigQuery fetched')
+    logger.info('Indexes from BigQuery fetched for ' + rows.length + ' pubkeys')
+
     return rows
 }

@@ -1,7 +1,8 @@
 import { BigQuery } from "@google-cloud/bigquery"
+import {logger} from "./helpers/logger";
 
 export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: number, val_amount: number}[]> {
-    console.log('BigQuery started...')
+    logger.info('Getting amounts from BigQuery for ' + valIds.length + ' pubkeys')
 
     const bigquery = new BigQuery()
 
@@ -14,7 +15,7 @@ export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: nu
             COALESCE(propose_penalty, 0) - 
             COALESCE(sync_penalty, 0)
         ) as val_amount 
-        FROM \`p2p-data-warehouse.raw_ethereum.validators_summary\`
+        FROM \`p2p-data-warehouse.raw_ethereum.${process.env.IS_TESTNET ? 'testnet_' : ''}validators_summary\`
         WHERE val_id IN (${valIds})
         GROUP BY val_id
     `
@@ -25,7 +26,7 @@ export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: nu
     })
     const [rows] = await job.getQueryResults()
 
-    console.log('BigQuery finished')
+    logger.info('Amounts from BigQuery fetched for ' + rows.length + ' pubkeys')
 
     return rows
 }
