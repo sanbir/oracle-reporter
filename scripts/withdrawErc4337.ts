@@ -35,6 +35,18 @@ export async function withdrawErc4337(feeDistributorAddress: string, tree: Stand
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
     // @ts-ignore
+    const feeDistributor = new ethers.Contract(feeDistributorAddress, feeDistributorAbi, provider)
+
+    const operator = await feeDistributor.operator()
+    if (signer.address !== operator) {
+        logger.info(
+            'Operator of ' + feeDistributorAddress + ' is ' + operator + '.\n'
+            + signer.address + ' must become an operator of ' + feeDistributorAddress
+            + ' for gasless withdraw to work.'
+        )
+    }
+
+    // @ts-ignore
     const entryPointContract = new ethers.Contract(entryPointAddress, entryPointAbi, provider)
 
     let iface = new ethers.utils.Interface(feeDistributorAbi);
