@@ -23,6 +23,8 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
         }
     }
 
+    logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes')
+
     const val_ids = pubkeysWithIndexes.map(r => r.val_id)
     const indexesWithAmounts = await getRowsFromBigQuery(val_ids)
 

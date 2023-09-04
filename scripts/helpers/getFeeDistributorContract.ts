@@ -9,6 +9,18 @@ export function getFeeDistributorContract(address: string) {
 
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
 
+    // @ts-ignore
+    const feeDistributorSigned = new ethers.Contract(address, abi, provider)
+    return feeDistributorSigned
+}
+
+export function getFeeDistributorContractSigned(address: string) {
+    if (!process.env.RPC_URL) {
+        throw new Error("No RPC_URL in ENV")
+    }
+
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
+
     if (!process.env.PRIVATE_KEY) {
         throw new Error("No PRIVATE_KEY in ENV")
     }

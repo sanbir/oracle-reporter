@@ -17,8 +17,8 @@ export async function getLegacyAlreadySplitClRewards(address: string) {
 
     const isGoerli = getIsGoerli()
 
-    const fromBlock = isGoerli ? '9451631': '17822992'
-    const toBlock = isGoerli ? 'latest': '17869702'
+    const fromBlock = isGoerli ? 9451631: 17822992
+    const toBlock = isGoerli ? 'latest': 17869702
 
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
 
@@ -38,6 +38,6 @@ export async function getLegacyAlreadySplitClRewards(address: string) {
         const log = logs[0]
         const decodedLog = new ethers.utils.Interface(['event OracleFeeDistributor__ClientOnlyClRewardsUpdated(uint256 _clientOnlyClRewards)']).parseLog(log);
         const legacyAlreadySplitClRewards = decodedLog.args._clientOnlyClRewards
-        return (legacyAlreadySplitClRewards as ethers.BigNumber).toNumber()
+        return (legacyAlreadySplitClRewards as ethers.BigNumber).div(1e9).toNumber()
     }
 }

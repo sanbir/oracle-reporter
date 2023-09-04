@@ -1,7 +1,7 @@
 import {StandardMerkleTree} from "@openzeppelin/merkle-tree";
 import {obtainProof} from "./helpers/obtainProof";
 import {logger} from "./helpers/logger";
-import {getFeeDistributorContract} from "./helpers/getFeeDistributorContract";
+import {getFeeDistributorContractSigned} from "./helpers/getFeeDistributorContract";
 
 export async function withdrawTx(feeDistributorAddress: string, tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawTx started for: ' + feeDistributorAddress)
@@ -16,7 +16,7 @@ export async function withdrawTx(feeDistributorAddress: string, tree: StandardMe
         throw new Error('No MAX_PIORITY_FEE_PER_GAS in ENV')
     }
 
-    const feeDistributor = getFeeDistributorContract(feeDistributorAddress)
+    const feeDistributor = getFeeDistributorContractSigned(feeDistributorAddress)
 
     await feeDistributor.withdraw(proof, amountInGwei, {
         gasLimit: 200000,

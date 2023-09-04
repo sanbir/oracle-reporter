@@ -58,7 +58,7 @@ withdrawal_periods as (select chunk.epoch,
 
 
 select val_id,
-       sum(amount) as amount
+       sum(amount) as val_amount
 from (
 select val_id, withdrawal_period,
        sum(mod(val_balance_withdrawn, cast(32*power(10,9) as int))) as withdrawn_rewards,
