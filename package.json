@@ -22,10 +22,11 @@
     "build": "tsc",
     "generate-report": "ts-node generate-report.ts",
     "01-amounts-for-pubkeys": "ts-node 01-amounts-for-pubkeys.ts",
-    "02-fee-distributors-with-amounts": "ts-node 02-fee-distributors-with-amounts.ts",
-    "03-merkle-tree": "ts-node 03-merkle-tree.ts",
-    "04-report-root-to-oracle-contract.ts": "ts-node 04-report-root-to-oracle-contract.ts",
-    "05-withdraw": "ts-node 05-withdraw.ts",
+    "02-fee-distributors-with-amounts-from-db": "ts-node 02-fee-distributors-with-amounts-from-db.ts",
+    "03-fee-distributors-with-legacy-already-split-amounts": "ts-node 03-fee-distributors-with-legacy-already-split-amounts.ts",
+    "04-merkle-tree": "ts-node 04-merkle-tree.ts",
+    "05-report-root-to-oracle-contract.ts": "ts-node 05-report-root-to-oracle-contract.ts",
+    "06-withdraw": "ts-node 06-withdraw.ts",
     "start": "ts-node index.ts"
   }
 }

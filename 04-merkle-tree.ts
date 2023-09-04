@@ -4,14 +4,14 @@ import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWi
 import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMerkleTreeForFeeDistributorAddress";
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
-import {makeOracleReport} from "./scripts/makeOracleReport";
+import {getLegacyAlreadySplitClRewards} from "./scripts/getLegacyAlreadySplitClRewards";
 
 async function main() {
-    logger.info('04-report-root-to-oracle-contract started')
+    logger.info('04-merkle-tree started')
 
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
 
-    const feeDistributorsWithAmounts = validatorWithFeeDistributorsAndAmounts.reduce((
+    const feeDistributorsWithAmountsFromDb = validatorWithFeeDistributorsAndAmounts.reduce((
         accumulator: FeeDistributorWithAmount[],
         validator
     ) => {
@@ -33,7 +33,28 @@ async function main() {
         return accumulator;
     }, [])
 
-    const rewardData = feeDistributorsWithAmounts.map(fd => {
+    const feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards: FeeDistributorWithAmount[] = []
+    for (const fd of feeDistributorsWithAmountsFromDb) {
+        try {
+            const legacyAlreadySplitClRewards = await getLegacyAlreadySplitClRewards(fd.feeDistributor)
+
+            const updatedAmount = fd.amount + legacyAlreadySplitClRewards
+
+            feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.push({
+                feeDistributor: fd.feeDistributor,
+                amount: updatedAmount
+            })
+        } catch (error) {
+            logger.error(error)
+        }
+    }
+
+    logger.info(
+        feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.length
+        + ' feeDistributors amount were updated'
+    )
+
+    const rewardData = feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.map(fd => {
         return [fd.feeDistributor, fd.amount.toString()]
     })
 
@@ -44,10 +65,7 @@ async function main() {
     fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
     logger.info('Merkle tree saved')
 
-    await makeOracleReport(tree.root)
-    logger.info('Root reported to the contract: ' + tree.root)
-
-    logger.info('04-report-root-to-oracle-contract finished')
+    logger.info('04-merkle-tree finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere

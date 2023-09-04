@@ -1,18 +1,15 @@
 import "dotenv/config"
 import {FeeDistributorWithAmount} from "./scripts/models/FeeDistributorWithAmount";
 import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWithFeeDistributorsAndAmount";
-import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMerkleTreeForFeeDistributorAddress";
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
-import {makeOracleReport} from "./scripts/makeOracleReport";
-import {withdrawAll} from "./scripts/withdrawAll";
 
 async function main() {
-    logger.info('05-withdraw started')
+    logger.info('02-fee-distributors-with-amounts-from-db started')
 
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
 
-    const feeDistributorsWithAmounts = validatorWithFeeDistributorsAndAmounts.reduce((
+    const feeDistributorsWithAmountsFromDb = validatorWithFeeDistributorsAndAmounts.reduce((
         accumulator: FeeDistributorWithAmount[],
         validator
     ) => {
@@ -34,24 +31,12 @@ async function main() {
         return accumulator;
     }, [])
 
-    const rewardData = feeDistributorsWithAmounts.map(fd => {
-        return [fd.feeDistributor, fd.amount.toString()]
-    })
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-amounts-from-db' + new Date() + '.json'
+    logger.info('Saving report to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(feeDistributorsWithAmountsFromDb))
+    logger.info('Report saved')
 
-    const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
-
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date() + '.json'
-    logger.info('Saving merkle tree to ' + filePath)
-    fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
-    logger.info('Merkle tree saved')
-
-    await makeOracleReport(tree.root)
-    logger.info('Root reported to the contract: ' + tree.root)
-
-    const feeDistributorFactoryAddress = feeDistributorsWithAmounts.map(fd => fd.feeDistributor)
-    await withdrawAll(feeDistributorFactoryAddress, tree)
-
-    logger.info('05-withdraw finished')
+    logger.info('02-fee-distributors-with-amounts-from-db finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere

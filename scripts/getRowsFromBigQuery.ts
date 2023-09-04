@@ -1,8 +1,11 @@
 import { BigQuery } from "@google-cloud/bigquery"
 import {logger} from "./helpers/logger";
+import {getIsGoerli} from "./helpers/getIsGoerli";
 
 export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: number, val_amount: number}[]> {
     logger.info('Getting amounts from BigQuery for ' + valIds.length + ' pubkeys')
+
+    const isGoerli = getIsGoerli()
 
     const bigquery = new BigQuery()
 
@@ -17,11 +20,11 @@ export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: nu
            att_penalty,
            propose_penalty,
            sync_penalty
-    from \`p2p-data-warehouse.raw_ethereum.${process.env.IS_TESTNET ? 'testnet_' : ''}validators_summary\`
+    from \`p2p-data-warehouse.raw_ethereum.${isGoerli ? 'testnet_' : ''}validators_summary\`
     where 1=1
       and val_slashed != 1
         and val_id IN (${valIds}) 
-            and epoch_date >= "2023-08-01"
+            ${isGoerli ? '' : 'and epoch_date >= "2023-08-01"'}
 ),
 
 
