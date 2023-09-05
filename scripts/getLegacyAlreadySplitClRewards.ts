@@ -3,13 +3,34 @@ import {ethers} from "ethers";
 import {logger} from "./helpers/logger";
 import {getIsGoerli} from "./helpers/getIsGoerli";
 import {sleep} from "./helpers/sleep";
+import {getIsContract} from "./helpers/getIsContract";
 
 // Needed to allow the new CL rewadrs query to work with the old values stored in contracts
 export async function getLegacyAlreadySplitClRewards(address: string) {
+    const isContract = await getIsContract(address)
+    if (!isContract) {
+        throw new Error(address + ' is an EOA, not a FeeDistributor. Will not split rewards')
+    }
+
     const feeDistributor = getFeeDistributorContract(address)
 
-    const withdrawSelector = await feeDistributor.withdrawSelector()
+    try {
+        const client = await feeDistributor.client()
+    } catch {
+        throw new Error(address + ' is not a FeeDistributor. Will not split rewards')
+    }
+    try {
+        const clientOnlyClRewards = await feeDistributor.clientOnlyClRewards()
+    } catch {
+        throw new Error(address + ' is not an OracleFeeDistributor. Will not split rewards')
+    }
 
+    let withdrawSelector = '';
+    try {
+        withdrawSelector = await feeDistributor.withdrawSelector()
+    } catch {
+        throw new Error(address + ' is not a V3 FeeDistributor. Will not split rewards')
+    }
     if (withdrawSelector !== '0xdd83edc3') {
         throw new Error(address + ' is not a V3 OracleFeeDistributor. Will not split rewards')
     }
@@ -31,8 +52,6 @@ export async function getLegacyAlreadySplitClRewards(address: string) {
     };
 
     const logs = await provider.getLogs(filter)
-
-    await sleep(1000) // too avoid rate limits
 
     if (!logs.length) {
         logger.info('No OracleFeeDistributor__ClientOnlyClRewardsUpdated logs found for ' + address

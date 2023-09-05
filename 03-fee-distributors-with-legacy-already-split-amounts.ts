@@ -4,6 +4,7 @@ import fs from "fs";
 import {
     getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+import {getIsContract} from "./scripts/helpers/getIsContract";
 
 async function main() {
     logger.info('03-fee-distributors-with-legacy-already-split-amounts started')

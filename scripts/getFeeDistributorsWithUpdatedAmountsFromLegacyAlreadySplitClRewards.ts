@@ -28,6 +28,8 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
         return accumulator;
     }, [])
 
+    logger.info(feeDistributorsWithAmountsFromDb.length + ' feeDistributorsWithAmountsFromDb found')
+
     const feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards: FeeDistributorWithAmount[] = []
     for (const fd of feeDistributorsWithAmountsFromDb) {
         try {
@@ -41,21 +43,6 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
             })
         } catch (error) {
             logger.error(error)
-
-            try {
-                logger.info('Trying ' + fd.feeDistributor + ' once again')
-
-                const legacyAlreadySplitClRewards = await getLegacyAlreadySplitClRewards(fd.feeDistributor)
-
-                const updatedAmount = fd.amount + legacyAlreadySplitClRewards
-
-                feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.push({
-                    feeDistributor: fd.feeDistributor,
-                    amount: updatedAmount
-                })
-            } catch (error) {
-                logger.error(error)
-            }
         }
     }
 
