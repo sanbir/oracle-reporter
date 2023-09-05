@@ -1,4 +1,5 @@
 import {Balances} from "./models/Balances";
+import {ethers} from "ethers";
 
 export function getBalancesDiff(balancesBefore: Balances, balancesAfter: Balances): Balances {
 
@@ -15,11 +16,11 @@ export function getBalancesDiff(balancesBefore: Balances, balancesAfter: Balance
             return {
                 feeDistributor: {
                     address: fdAfter.feeDistributor.address,
-                    balance: fdAfter.feeDistributor.balance - fdBefore.feeDistributor.balance
+                    balance: ethers.BigNumber.from(fdAfter.feeDistributor.balance).sub(ethers.BigNumber.from(fdBefore.feeDistributor.balance)).toString()
                 },
                 client: {
                     address: fdAfter.client.address,
-                    balance: fdAfter.client.balance - fdBefore.client.balance
+                    balance: ethers.BigNumber.from(fdAfter.client.balance).sub(ethers.BigNumber.from(fdBefore.client.balance)).toString()
                 }
             }
         }
@@ -28,7 +29,7 @@ export function getBalancesDiff(balancesBefore: Balances, balancesAfter: Balance
     const diff: Balances = {
         feeDistributors,
         p2pAddress: "0x6Bb8b45a1C6eA816B70d76f83f7dC4f0f87365Ff",
-        p2pAddressBalance: balancesAfter.p2pAddressBalance - balancesBefore.p2pAddressBalance
+        p2pAddressBalance: ethers.BigNumber.from(balancesAfter.p2pAddressBalance).sub(ethers.BigNumber.from(balancesBefore.p2pAddressBalance)).toString()
     }
 
     return diff
