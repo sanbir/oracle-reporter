@@ -7,7 +7,7 @@ import {
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 
 async function main() {
-    logger.info('04-merkle-tree started')
+    logger.info('05-merkle-tree started')
 
     const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
 
@@ -22,7 +22,7 @@ async function main() {
     fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
     logger.info('Merkle tree saved')
 
-    logger.info('04-merkle-tree finished')
+    logger.info('05-merkle-tree finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere

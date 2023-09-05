@@ -3,13 +3,12 @@ import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMe
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
 import {makeOracleReport} from "./scripts/makeOracleReport";
-import {withdrawAll} from "./scripts/withdrawAll";
 import {
     getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 
 async function main() {
-    logger.info('06-withdraw started')
+    logger.info('06-report-root-to-oracle-contract started')
 
     const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
 
@@ -27,10 +26,7 @@ async function main() {
     await makeOracleReport(tree.root)
     logger.info('Root reported to the contract: ' + tree.root)
 
-    const feeDistributorFactoryAddress = fds.map(fd => fd.feeDistributor)
-    await withdrawAll(feeDistributorFactoryAddress, tree)
-
-    logger.info('06-withdraw finished')
+    logger.info('06-report-root-to-oracle-contract finished')
 }
 
 // We recommend this pattern to be able to use async/await everywhere
