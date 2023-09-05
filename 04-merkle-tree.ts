@@ -1,60 +1,17 @@
 import "dotenv/config"
-import {FeeDistributorWithAmount} from "./scripts/models/FeeDistributorWithAmount";
-import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWithFeeDistributorsAndAmount";
 import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMerkleTreeForFeeDistributorAddress";
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
-import {getLegacyAlreadySplitClRewards} from "./scripts/getLegacyAlreadySplitClRewards";
+import {
+    getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
+} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 
 async function main() {
     logger.info('04-merkle-tree started')
 
-    const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
+    const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
 
-    const feeDistributorsWithAmountsFromDb = validatorWithFeeDistributorsAndAmounts.reduce((
-        accumulator: FeeDistributorWithAmount[],
-        validator
-    ) => {
-        const existingEntry = accumulator.find(
-            entry => entry.feeDistributor === validator.feeDistributor
-        )
-
-        if (existingEntry) {
-            existingEntry.amount += validator.amount;
-        } else {
-            const newEntry: FeeDistributorWithAmount = {
-                feeDistributor: validator.feeDistributor,
-                amount: validator.amount
-            }
-
-            accumulator.push(newEntry);
-        }
-
-        return accumulator;
-    }, [])
-
-    const feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards: FeeDistributorWithAmount[] = []
-    for (const fd of feeDistributorsWithAmountsFromDb) {
-        try {
-            const legacyAlreadySplitClRewards = await getLegacyAlreadySplitClRewards(fd.feeDistributor)
-
-            const updatedAmount = fd.amount + legacyAlreadySplitClRewards
-
-            feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.push({
-                feeDistributor: fd.feeDistributor,
-                amount: updatedAmount
-            })
-        } catch (error) {
-            logger.error(error)
-        }
-    }
-
-    logger.info(
-        feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.length
-        + ' feeDistributors amount were updated'
-    )
-
-    const rewardData = feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.map(fd => {
+    const rewardData = fds.map(fd => {
         return [fd.feeDistributor, fd.amount.toString()]
     })
 

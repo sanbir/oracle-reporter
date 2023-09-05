@@ -2,6 +2,7 @@ import {getFeeDistributorContract} from "./helpers/getFeeDistributorContract";
 import {ethers} from "ethers";
 import {logger} from "./helpers/logger";
 import {getIsGoerli} from "./helpers/getIsGoerli";
+import {sleep} from "./helpers/sleep";
 
 // Needed to allow the new CL rewadrs query to work with the old values stored in contracts
 export async function getLegacyAlreadySplitClRewards(address: string) {
@@ -30,6 +31,9 @@ export async function getLegacyAlreadySplitClRewards(address: string) {
     };
 
     const logs = await provider.getLogs(filter)
+
+    await sleep(1000) // too avoid rate limits
+
     if (!logs.length) {
         logger.info('No OracleFeeDistributor__ClientOnlyClRewardsUpdated logs found for ' + address
             + '.\nLegacyAlreadySplitClRewards is 0.')
