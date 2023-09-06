@@ -31,12 +31,7 @@ export async function withdrawAll(feeDistributorsAddresses: string[], tree: Stan
             continue
         }
 
-        const use4337 = process.env.USE_ERC_4337
-        if (use4337) {
-            await withdrawErc4337(feeDistributorsAddress, tree)
-        } else {
-            await withdrawTx(feeDistributorsAddress, tree)
-        }
+        await withdrawTx(feeDistributorsAddress, tree)
     }
 
     logger.info('withdrawAll finished')

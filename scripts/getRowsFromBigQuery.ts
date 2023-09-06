@@ -24,7 +24,7 @@ export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: nu
     where 1=1
       and val_slashed != 1
         and val_id IN (${valIds}) 
-            ${isGoerli ? '' : 'and epoch_date >= "2023-08-01"'}
+            ${isGoerli ? '' : 'and epoch_date >= "2023-07-11"'}
 ),
 
 
