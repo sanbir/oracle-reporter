@@ -10,7 +10,7 @@ async function main() {
 
     const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-legacy-already-split-amounts' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-legacy-already-split-amounts' + new Date().toISOString() + '.json'
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(fds))
     logger.info('Report saved')
