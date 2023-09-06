@@ -7,7 +7,7 @@ async function main() {
     logger.info('01-amounts-for-pubkeys started')
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/amounts-for-pubkeys' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/amounts-for-pubkeys' + new Date().toISOString() + '.json'
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(validatorWithFeeDistributorsAndAmounts))
     logger.info('Report saved')

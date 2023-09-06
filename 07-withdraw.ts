@@ -21,7 +21,7 @@ async function main() {
 
     const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date().toISOString() + '.json'
     logger.info('Saving merkle tree to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
     logger.info('Merkle tree saved')
@@ -32,7 +32,7 @@ async function main() {
     const feeDistributorsAddresses = fds.map(fd => fd.feeDistributor)
 
     const balancesBefore = await getAllBalances(feeDistributorsAddresses)
-    const balancesBeforePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-before' + new Date() + '.json'
+    const balancesBeforePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-before' + new Date().toISOString() + '.json'
     logger.info('Saving balances before to ' + balancesBeforePath)
     fs.writeFileSync(balancesBeforePath, JSON.stringify(balancesBefore))
     logger.info('Balances before saved')
@@ -40,13 +40,13 @@ async function main() {
     await withdrawAll(feeDistributorsAddresses, tree)
 
     const balancesAfter = await getAllBalances(feeDistributorsAddresses)
-    const balancesAfterPath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-after' + new Date() + '.json'
+    const balancesAfterPath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-after' + new Date().toISOString() + '.json'
     logger.info('Saving balances after to ' + balancesAfterPath)
     fs.writeFileSync(balancesAfterPath, JSON.stringify(balancesAfter))
     logger.info('Balances after saved')
 
     const balancesDiff = await getBalancesDiff(balancesBefore, balancesAfter)
-    const balancesDiffPath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-diff' + new Date() + '.json'
+    const balancesDiffPath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-diff' + new Date().toISOString() + '.json'
     logger.info('Saving balances diff to ' + balancesDiffPath)
     fs.writeFileSync(balancesDiffPath, JSON.stringify(balancesDiff))
     logger.info('Balances diff saved')

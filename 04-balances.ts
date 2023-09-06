@@ -15,7 +15,7 @@ async function main() {
 
     const balances = await getAllBalances(feeDistributorsAddresses)
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-before' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-before' + new Date().toISOString() + '.json'
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(balances))
     logger.info('Report saved')

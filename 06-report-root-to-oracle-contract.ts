@@ -18,7 +18,7 @@ async function main() {
 
     const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date().toISOString() + '.json'
     logger.info('Saving merkle tree to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
     logger.info('Merkle tree saved')

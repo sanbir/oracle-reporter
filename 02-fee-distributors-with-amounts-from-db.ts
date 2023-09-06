@@ -31,7 +31,7 @@ async function main() {
         return accumulator;
     }, [])
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-amounts-from-db' + new Date() + '.json'
+    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-amounts-from-db' + new Date().toISOString() + '.json'
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(feeDistributorsWithAmountsFromDb))
     logger.info('Report saved')
