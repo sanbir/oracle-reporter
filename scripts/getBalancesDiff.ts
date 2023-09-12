@@ -16,11 +16,11 @@ export function getBalancesDiff(balancesBefore: Balances, balancesAfter: Balance
             return {
                 feeDistributor: {
                     address: fdAfter.feeDistributor.address,
-                    balance: ethers.utils.parseEther(fdAfter.feeDistributor.balance).sub(ethers.utils.parseEther(fdBefore.feeDistributor.balance)).toString()
+                    balance: ethers.utils.formatEther(ethers.utils.parseEther(fdAfter.feeDistributor.balance).sub(ethers.utils.parseEther(fdBefore.feeDistributor.balance)))
                 },
                 client: {
                     address: fdAfter.client.address,
-                    balance: ethers.utils.parseEther(fdAfter.client.balance).sub(ethers.utils.parseEther(fdBefore.client.balance)).toString()
+                    balance: ethers.utils.formatEther(ethers.utils.parseEther(fdAfter.client.balance).sub(ethers.utils.parseEther(fdBefore.client.balance)))
                 }
             }
         }
