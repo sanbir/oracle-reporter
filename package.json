@@ -25,6 +25,7 @@
     "04-balances": "ts-node 04-balances.ts",
     "05-merkle-tree": "ts-node 05-merkle-tree.ts",
     "06-report-root-to-oracle-contract.ts": "ts-node 06-report-root-to-oracle-contract.ts",
-    "07-withdraw": "ts-node 07-withdraw.ts"
+    "07-withdraw": "ts-node 07-withdraw.ts",
+    "99-test": "ts-node 99-test.ts"
   }
 }
