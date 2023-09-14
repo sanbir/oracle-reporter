@@ -29,7 +29,7 @@ export function getBalancesDiff(balancesBefore: Balances, balancesAfter: Balance
     const diff: Balances = {
         feeDistributors,
         p2pAddress: "0x6Bb8b45a1C6eA816B70d76f83f7dC4f0f87365Ff",
-        p2pAddressBalance: ethers.utils.parseEther(balancesAfter.p2pAddressBalance).sub(ethers.utils.parseEther(balancesBefore.p2pAddressBalance)).toString()
+        p2pAddressBalance: ethers.utils.formatEther(ethers.utils.parseEther(balancesAfter.p2pAddressBalance).sub(ethers.utils.parseEther(balancesBefore.p2pAddressBalance)))
     }
 
     return diff
