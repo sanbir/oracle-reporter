@@ -21,6 +21,39 @@ app.get('/amounts-for-pubkeys', async (req: Request, res: Response) => {
     res.sendFile(filePath)
 })
 
+app.get('/fee-distributors-with-legacy-already-split-amounts', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('fee-distributors-with-legacy-already-split-amounts')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
+app.get('/fee-distributors-with-amounts-from-db', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('fee-distributors-with-amounts-from-db')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
+app.get('/merkle-tree', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('merkle-tree')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
 app.post('/withdraw', async (req: Request, res: Response) => {
     logger.info('withdraw started')
 
