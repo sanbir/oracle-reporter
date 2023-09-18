@@ -4,6 +4,8 @@ import {getRowsFromBigQuery} from "./getRowsFromBigQuery";
 import {ValidatorWithFeeDistributorsAndAmount} from "./models/ValidatorWithFeeDistributorsAndAmount";
 import {logger} from "./helpers/logger";
 import {ethers} from "ethers";
+import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
+import fs from "fs";
 
 export async function getValidatorWithFeeDistributorsAndAmount() {
     logger.info('getValidatorWithFeeDistributorsAndAmount started')
@@ -49,6 +51,11 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
             amount
         })
     }
+
+    const filePath = getDatedJsonFilePath('amounts-for-pubkeys')
+    logger.info('Saving amounts-for-pubkeys to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(validatorWithFeeDistributorsAndAmounts))
+    logger.info('amounts-for-pubkeys saved')
 
     logger.info(
         'getValidatorWithFeeDistributorsAndAmount finished with '

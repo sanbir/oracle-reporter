@@ -16,12 +16,7 @@ async function main() {
         return [fd.feeDistributor, fd.amount.toString()]
     })
 
-    const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
-
-    const filePath = getDatedJsonFilePath('merkle-tree')
-    logger.info('Saving merkle tree to ' + filePath)
-    fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
-    logger.info('Merkle tree saved')
+    buildMerkleTreeForFeeDistributorAddress(rewardData)
 
     logger.info('05-merkle-tree finished')
 }

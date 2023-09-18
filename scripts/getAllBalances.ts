@@ -5,10 +5,11 @@ import {getBalance} from "./helpers/getBalance";
 import {ethers} from "ethers";
 import {AddressBalance} from "./models/AddressBalance";
 import {getFeeDistributorContract} from "./helpers/getFeeDistributorContract";
+import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 
 const p2pAddress = '0x6Bb8b45a1C6eA816B70d76f83f7dC4f0f87365Ff'
 
-export async function getAllBalances(feeDistributorsAddresses: string[]) {
+export async function getAllBalances(feeDistributorsAddresses: string[], kindOfBalances: string) {
     logger.info('getAllBalances started')
 
     const feeDistributorsWithBalances: {
@@ -41,6 +42,11 @@ export async function getAllBalances(feeDistributorsAddresses: string[]) {
     const balances: Balances = {
         feeDistributors: feeDistributorsWithBalances, p2pAddress, p2pAddressBalance
     }
+
+    const filePath = getDatedJsonFilePath(kindOfBalances)
+    logger.info('Saving ' + kindOfBalances + ' to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(balances))
+    logger.info(kindOfBalances + ' saved')
 
     logger.info('getAllBalances finished')
 

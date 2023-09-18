@@ -4,8 +4,6 @@ import {
     getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 import {getAllBalances} from "./scripts/getAllBalances";
-import fs from "fs";
-import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('04-balances started')
@@ -14,12 +12,7 @@ async function main() {
 
     const feeDistributorsAddresses = fds.map(fd => fd.feeDistributor)
 
-    const balances = await getAllBalances(feeDistributorsAddresses)
-
-    const filePath = getDatedJsonFilePath('balances-before')
-    logger.info('Saving report to ' + filePath)
-    fs.writeFileSync(filePath, JSON.stringify(balances))
-    logger.info('Report saved')
+    await getAllBalances(feeDistributorsAddresses, 'balances-before')
 
     logger.info('04-balances finished')
 }

@@ -19,11 +19,6 @@ async function main() {
 
     const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
 
-    const filePath = getDatedJsonFilePath('merkle-tree')
-    logger.info('Saving merkle tree to ' + filePath)
-    fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
-    logger.info('Merkle tree saved')
-
     await makeOracleReport(tree.root)
     logger.info('Root reported to the contract: ' + tree.root)
 

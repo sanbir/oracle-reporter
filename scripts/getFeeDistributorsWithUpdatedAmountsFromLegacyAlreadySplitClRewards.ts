@@ -2,6 +2,8 @@ import {getValidatorWithFeeDistributorsAndAmount} from "./getValidatorWithFeeDis
 import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
 import {getLegacyAlreadySplitClRewards} from "./getLegacyAlreadySplitClRewards";
 import {logger} from "./helpers/logger";
+import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
+import fs from "fs";
 
 export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards() {
     const validatorWithFeeDistributorsAndAmounts = await getValidatorWithFeeDistributorsAndAmount()
@@ -45,6 +47,11 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
             logger.error(error)
         }
     }
+
+    const filePath = getDatedJsonFilePath('fee-distributors-with-legacy-already-split-amounts')
+    logger.info('Saving fee-distributors-with-legacy-already-split-amounts to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards))
+    logger.info('fee-distributors-with-legacy-already-split-amounts saved')
 
     logger.info(
         feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.length
