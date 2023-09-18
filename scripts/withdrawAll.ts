@@ -4,6 +4,7 @@ import {getBalance} from "./helpers/getBalance";
 import {ethers} from "ethers";
 import {logger} from "./helpers/logger";
 import {withdrawTx} from "./withdrawTx";
+import {getUse4337} from "./helpers/getUse4337";
 
 export async function withdrawAll(feeDistributorsAddresses: string[], tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawAll started')
@@ -13,29 +14,33 @@ export async function withdrawAll(feeDistributorsAddresses: string[], tree: Stan
     }
 
     for (const feeDistributorsAddress of feeDistributorsAddresses) {
-        const balance = await getBalance(feeDistributorsAddress)
-        logger.info(
-            'Balance of '
-            + feeDistributorsAddress
-            + ' is '
-            + ethers.utils.formatUnits(balance, "ether")
-            + 'ETH'
-        )
-
-        if (balance.lt(ethers.utils.parseUnits(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI, "gwei"))) {
+        try {
+            const balance = await getBalance(feeDistributorsAddress)
             logger.info(
                 'Balance of '
                 + feeDistributorsAddress
-                + ' is less than minimum to withdraw. Will not withdraw.'
+                + ' is '
+                + ethers.utils.formatUnits(balance, "ether")
+                + 'ETH'
             )
-            continue
-        }
 
-        const use4337 = process.env.USE_ERC_4337
-        if (use4337) {
-            await withdrawErc4337(feeDistributorsAddress, tree)
-        } else {
-            await withdrawTx(feeDistributorsAddress, tree)
+            if (balance.lt(ethers.utils.parseUnits(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI, "gwei"))) {
+                logger.info(
+                    'Balance of '
+                    + feeDistributorsAddress
+                    + ' is less than minimum to withdraw. Will not withdraw.'
+                )
+                continue
+            }
+
+            const use4337 = getUse4337()
+            if (use4337) {
+                await withdrawErc4337(feeDistributorsAddress, tree)
+            } else {
+                await withdrawTx(feeDistributorsAddress, tree)
+            }
+        } catch (error) {
+            logger.error(error)
         }
     }
 
