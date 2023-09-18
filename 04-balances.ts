@@ -5,6 +5,7 @@ import {
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 import {getAllBalances} from "./scripts/getAllBalances";
 import fs from "fs";
+import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('04-balances started')
@@ -15,7 +16,7 @@ async function main() {
 
     const balances = await getAllBalances(feeDistributorsAddresses)
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/balances-before' + new Date().toISOString() + '.json'
+    const filePath = getDatedJsonFilePath('balances-before')
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(balances))
     logger.info('Report saved')

@@ -6,6 +6,7 @@ import {makeOracleReport} from "./scripts/makeOracleReport";
 import {
     getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('06-report-root-to-oracle-contract started')
@@ -18,7 +19,7 @@ async function main() {
 
     const tree = buildMerkleTreeForFeeDistributorAddress(rewardData)
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/merkle-tree' + new Date().toISOString() + '.json'
+    const filePath = getDatedJsonFilePath('merkle-tree')
     logger.info('Saving merkle tree to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(tree.dump()))
     logger.info('Merkle tree saved')

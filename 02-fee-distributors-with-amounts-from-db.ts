@@ -3,6 +3,7 @@ import {FeeDistributorWithAmount} from "./scripts/models/FeeDistributorWithAmoun
 import {getValidatorWithFeeDistributorsAndAmount} from "./scripts/getValidatorWithFeeDistributorsAndAmount";
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
+import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('02-fee-distributors-with-amounts-from-db started')
@@ -31,7 +32,7 @@ async function main() {
         return accumulator;
     }, [])
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-amounts-from-db' + new Date().toISOString() + '.json'
+    const filePath = getDatedJsonFilePath('fee-distributors-with-amounts-from-db')
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(feeDistributorsWithAmountsFromDb))
     logger.info('Report saved')

@@ -4,13 +4,14 @@ import fs from "fs";
 import {
     getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
 } from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('03-fee-distributors-with-legacy-already-split-amounts started')
 
     const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
 
-    const filePath = process.env.FOLDER_FOR_REPORTS_PATH! + '/fee-distributors-with-legacy-already-split-amounts' + new Date().toISOString() + '.json'
+    const filePath = getDatedJsonFilePath('fee-distributors-with-legacy-already-split-amounts')
     logger.info('Saving report to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(fds))
     logger.info('Report saved')
