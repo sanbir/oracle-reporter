@@ -2,6 +2,7 @@ import {StandardMerkleTree} from "@openzeppelin/merkle-tree";
 import {obtainProof} from "./helpers/obtainProof";
 import {logger} from "./helpers/logger";
 import {getFeeDistributorContractSigned} from "./helpers/getFeeDistributorContract";
+import {ContractTransaction} from "ethers";
 
 export async function withdrawTx(feeDistributorAddress: string, tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawTx started for: ' + feeDistributorAddress)
@@ -18,11 +19,13 @@ export async function withdrawTx(feeDistributorAddress: string, tree: StandardMe
 
     const feeDistributor = getFeeDistributorContractSigned(feeDistributorAddress)
 
-    await feeDistributor.withdraw(proof, amountInGwei, {
+    const tx: ContractTransaction = await feeDistributor.withdraw(proof, amountInGwei, {
         gasLimit: 200000,
         maxFeePerGas: process.env.MAX_FEE_PER_GAS,
         maxPriorityFeePerGas: process.env.MAX_PIORITY_FEE_PER_GAS
     })
 
-    logger.info('withdrawTx finished for: ' + feeDistributorAddress)
+    logger.info('withdrawTx finished for: ' + feeDistributorAddress + '. Hash: ' + tx.hash)
+
+    return tx.hash
 }

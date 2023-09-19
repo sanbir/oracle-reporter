@@ -5,6 +5,8 @@ import {ethers} from "ethers";
 import {logger} from "./helpers/logger";
 import {withdrawTx} from "./withdrawTx";
 import {getUse4337} from "./helpers/getUse4337";
+import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
+import fs from "fs";
 
 export async function withdrawAll(feeDistributorsAddresses: string[], tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawAll started')
@@ -12,6 +14,8 @@ export async function withdrawAll(feeDistributorsAddresses: string[], tree: Stan
     if (!process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI) {
         throw new Error('MIN_BALANCE_TO_WITHDRAW_IN_GWEI not set in ENV')
     }
+
+    const txHashesForFdAddresses: {address: string, hash: string}[] = []
 
     for (const feeDistributorsAddress of feeDistributorsAddresses) {
         try {
@@ -33,16 +37,26 @@ export async function withdrawAll(feeDistributorsAddresses: string[], tree: Stan
                 continue
             }
 
+            let hash = ''
             const use4337 = getUse4337()
             if (use4337) {
-                await withdrawErc4337(feeDistributorsAddress, tree)
+                hash = await withdrawErc4337(feeDistributorsAddress, tree)
             } else {
-                await withdrawTx(feeDistributorsAddress, tree)
+                hash = await withdrawTx(feeDistributorsAddress, tree)
             }
+            txHashesForFdAddresses.push({address: feeDistributorsAddress, hash})
+
         } catch (error) {
             logger.error(error)
         }
     }
 
+    const filePath = getDatedJsonFilePath('tx-hashes-for-fd-addresses')
+    logger.info('Saving tx-hashes-for-fd-addresses to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(txHashesForFdAddresses))
+    logger.info('tx-hashes-for-fd-addresses saved')
+
     logger.info('withdrawAll finished')
+
+    return txHashesForFdAddresses
 }

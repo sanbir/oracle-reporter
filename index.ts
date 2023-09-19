@@ -54,6 +54,50 @@ app.get('/merkle-tree', async (req: Request, res: Response) => {
     res.sendFile(filePath)
 })
 
+app.get('/tx-hashes-for-fd-addresses', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('tx-hashes-for-fd-addresses')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
+app.get('/balances-before', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('balances-before')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
+app.get('/balances-after', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('balances-after')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
+app.get('/balances-diff', async (req: Request, res: Response) => {
+    const filePath = getDatedJsonFilePath('balances-diff')
+
+    if (!fs.existsSync(filePath)) {
+        res.status(404).send('File not found.')
+        return
+    }
+
+    res.sendFile(filePath)
+})
+
 app.post('/withdraw', async (req: Request, res: Response) => {
     logger.info('withdraw started')
 

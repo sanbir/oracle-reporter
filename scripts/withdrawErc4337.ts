@@ -114,4 +114,6 @@ export async function withdrawErc4337(feeDistributorAddress: string, tree: Stand
 
             logger.info('withdrawOneOracle finished for: ' + feeDistributorAddress)
         });
+
+    return userOpHash
 }
