@@ -3,6 +3,7 @@ import fs from 'fs'
 import {logger} from "./scripts/helpers/logger";
 import {withdraw} from "./scripts/withdraw";
 import {getDatedJsonFilePath, getRunDate, resetRunDate} from "./scripts/helpers/getDatedJsonFilePath";
+import {reTryWithdrawWithExistingTree} from "./scripts/reTryWithdrawWithExistingTree";
 
 const app = express()
 
@@ -121,6 +122,29 @@ app.post('/withdraw', async (req: Request, res: Response) => {
     await withdraw()
 
     logger.info('withdraw finished')
+})
+
+app.post('/re-try-withdraw', async (req: Request, res: Response) => {
+    logger.info('re-try-withdraw started')
+
+    console.log(process.env.RPC_URL)
+    console.log(process.env.ORACLE_ADDRESS)
+    console.log(process.env.MAX_FEE_PER_GAS)
+    console.log(process.env.MAX_PIORITY_FEE_PER_GAS)
+    console.log(process.env.STACKUP_API_KEY)
+    console.log(process.env.KEY_FILE_NAME)
+    console.log(process.env.FEE_MANAGER_PROPOSERS_URL)
+    console.log(process.env.IS_TESTNET)
+    console.log(process.env.USE_ERC_4337)
+    console.log(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI)
+    console.log(process.env.FOLDER_FOR_REPORTS_PATH)
+    console.log(getRunDate().toISOString())
+
+    res.status(200).send('re-try-withdraw started at ' + getRunDate().toISOString())
+
+    await reTryWithdrawWithExistingTree()
+
+    logger.info('re-try-withdraw finished')
 })
 
 app.listen(process.env.PORT, () => console.log('Server started on port', process.env.PORT))
