@@ -1,3 +1,4 @@
+import "dotenv/config"
 import express, { Request, Response } from 'express'
 import fs from 'fs'
 import {logger} from "./scripts/helpers/logger";
@@ -5,6 +6,7 @@ import {withdraw} from "./scripts/withdraw";
 import {getDatedJsonFilePath, getRunDate, resetRunDate} from "./scripts/helpers/getDatedJsonFilePath";
 import {reTryWithdrawWithExistingTree} from "./scripts/reTryWithdrawWithExistingTree";
 import {fetchWithdrawTxStatusesFromChain} from "./scripts/fetchWithdrawTxStatusesFromChain";
+import {setClientOnlyClRewards} from "./scripts/setClientOnlyClRewards";
 
 const app = express()
 
@@ -180,6 +182,35 @@ app.post('/fetch-withdraw-tx-statuses-from-chain', async (req: Request, res: Res
     await fetchWithdrawTxStatusesFromChain()
 
     logger.info('fetch-withdraw-tx-statuses-from-chain finished')
+})
+
+app.post('/set-client-only-cl-rewards', async (req: Request, res: Response) => {
+    const feeDividerAddress = req.query['feeDividerAddress'] as string
+
+    if (!feeDividerAddress) {
+        res.status(404).send('No feeDividerAddress is query string')
+        return
+    }
+
+    logger.info('feeDividerAddress: ' + feeDividerAddress)
+
+    let rawData = ''
+    req.on('data', chunk => {
+        rawData += chunk
+    })
+
+    req.on('end', async () => {
+        if (!rawData) {
+            res.status(404).send('No pubkeys in request body')
+        } else {
+            const pubkeys = rawData.split('\n')
+            logger.info('pubkeys: ' + pubkeys)
+
+            res.status(200).send('set-client-only-cl-rewards started at ' + new Date().toISOString())
+
+            await setClientOnlyClRewards(feeDividerAddress, pubkeys)
+        }
+    })
 })
 
 app.listen(process.env.PORT, () => console.log('Server started on port', process.env.PORT))

@@ -2,10 +2,11 @@ import { BigQuery } from "@google-cloud/bigquery"
 import {logger} from "./helpers/logger";
 import {getIsGoerli} from "./helpers/getIsGoerli";
 
-export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: number, val_amount: number}[]> {
+export async function getRowsFromBigQuery(valIds: number[], endDate?: Date): Promise<{val_id: number, val_amount: number}[]> {
     logger.info('Getting amounts from BigQuery for ' + valIds.length + ' pubkeys')
 
     const isGoerli = getIsGoerli()
+    const endDateString = endDate?.toISOString().slice(0,10)
 
     const bigquery = new BigQuery()
 
@@ -25,6 +26,7 @@ export async function getRowsFromBigQuery(valIds: number[]): Promise<{val_id: nu
       and val_slashed != 1
         and val_id IN (${valIds}) 
             ${isGoerli ? '' : 'and epoch_date >= "2023-08-01"'}
+            ${endDateString ? 'and epoch_date <= "' + endDateString + '"' : ''}
 ),
 
 
