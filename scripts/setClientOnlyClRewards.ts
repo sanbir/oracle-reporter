@@ -1,6 +1,6 @@
 import {logger} from "./helpers/logger";
 import {getClientOnlyClRewardsForPubkeys} from "./getClientOnlyClRewardsForPubkeys";
-import {getFeeDistributorContract} from "./helpers/getFeeDistributorContract";
+import {getFeeDistributorContractSigned} from "./helpers/getFeeDistributorContract";
 import {ethers} from "ethers";
 
 export async function setClientOnlyClRewards(feeDividerAddress: string, pubkeys: string[]) {
@@ -9,7 +9,7 @@ export async function setClientOnlyClRewards(feeDividerAddress: string, pubkeys:
     const clientOnlyClRewardsInGwei = await getClientOnlyClRewardsForPubkeys(pubkeys)
     const clientOnlyClRewards = ethers.BigNumber.from(clientOnlyClRewardsInGwei).mul(1e9)
 
-    const feeDistributor = getFeeDistributorContract(feeDividerAddress)
+    const feeDistributor = getFeeDistributorContractSigned(feeDividerAddress)
 
     const clientOnlyClRewardsFromContract = await feeDistributor.clientOnlyClRewards()
 
