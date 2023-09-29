@@ -186,13 +186,18 @@ app.post('/fetch-withdraw-tx-statuses-from-chain', async (req: Request, res: Res
 
 app.post('/set-client-only-cl-rewards', async (req: Request, res: Response) => {
     const feeDividerAddress = req.query['feeDividerAddress'] as string
-
     if (!feeDividerAddress) {
         res.status(404).send('No feeDividerAddress is query string')
         return
     }
-
     logger.info('feeDividerAddress: ' + feeDividerAddress)
+
+    const endDateIsoString = req.query['endDateIsoString'] as string
+    let endDate = new Date()
+    logger.info('endDateIsoString: ' + endDateIsoString)
+    if (endDateIsoString) {
+        endDate = new Date(endDateIsoString)
+    }
 
     let rawData = ''
     req.on('data', chunk => {
@@ -208,7 +213,7 @@ app.post('/set-client-only-cl-rewards', async (req: Request, res: Response) => {
 
             res.status(200).send('set-client-only-cl-rewards started at ' + new Date().toISOString())
 
-            await setClientOnlyClRewards(feeDividerAddress, pubkeys)
+            await setClientOnlyClRewards(feeDividerAddress, pubkeys, endDate)
         }
     })
 })
