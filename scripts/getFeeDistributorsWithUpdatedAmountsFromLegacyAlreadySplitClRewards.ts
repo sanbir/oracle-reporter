@@ -21,7 +21,11 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
         } else {
             const newEntry: FeeDistributorWithAmount = {
                 feeDistributor: validator.feeDistributor,
-                amount: validator.amount
+                amount: validator.amount,
+
+                referenceFeeDistributor: validator.referenceFeeDistributor,
+                clientConfig: validator.clientConfig,
+                referrerConfig: validator.referrerConfig
             }
 
             accumulator.push(newEntry);
@@ -40,7 +44,7 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
             const updatedAmount = fd.amount + legacyAlreadySplitClRewards
 
             feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.push({
-                feeDistributor: fd.feeDistributor,
+                ...fd,
                 amount: updatedAmount
             })
         } catch (error) {

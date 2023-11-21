@@ -3,12 +3,9 @@ import {
 } from "./getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
 import {buildMerkleTreeForFeeDistributorAddress} from "./helpers/buildMerkleTreeForFeeDistributorAddress";
 import {logger} from "./helpers/logger";
-import fs from "fs";
 import {makeOracleReport} from "./makeOracleReport";
 import {getAllBalances} from "./getAllBalances";
 import {withdrawAll} from "./withdrawAll";
-import {getBalancesDiff} from "./getBalancesDiff";
-import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 
 export async function withdraw() {
     try {
@@ -25,15 +22,8 @@ export async function withdraw() {
 
         const feeDistributorsAddresses = fds.map(fd => fd.feeDistributor)
 
-        const balancesBefore = await getAllBalances(feeDistributorsAddresses, 'balances-before')
-        await withdrawAll(feeDistributorsAddresses, tree)
-        const balancesAfter = await getAllBalances(feeDistributorsAddresses, 'balances-after')
-
-        const balancesDiff = await getBalancesDiff(balancesBefore, balancesAfter)
-        const balancesDiffPath = getDatedJsonFilePath('balances-diff')
-        logger.info('Saving balances diff to ' + balancesDiffPath)
-        fs.writeFileSync(balancesDiffPath, JSON.stringify(balancesDiff))
-        logger.info('Balances diff saved')
+        await getAllBalances(feeDistributorsAddresses, 'balances-before')
+        await withdrawAll(fds, tree)
     } catch (error) {
         logger.error(error)
     }

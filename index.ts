@@ -213,7 +213,7 @@ app.post('/set-client-only-cl-rewards', async (req: Request, res: Response) => {
 
             res.status(200).send('set-client-only-cl-rewards started at ' + new Date().toISOString())
 
-            await setClientOnlyClRewards(feeDividerAddress, pubkeys, endDate)
+            await setClientOnlyClRewards(feeDividerAddress, pubkeys, new Date('2023-08-01'), endDate)
         }
     })
 })

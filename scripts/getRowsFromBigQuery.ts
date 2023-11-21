@@ -2,10 +2,15 @@ import { BigQuery } from "@google-cloud/bigquery"
 import {logger} from "./helpers/logger";
 import {getIsGoerli} from "./helpers/getIsGoerli";
 
-export async function getRowsFromBigQuery(valIds: number[], endDate?: Date): Promise<{val_id: number, val_amount: number}[]> {
+export async function getRowsFromBigQuery(
+    valIds: number[],
+    startDate: Date,
+    endDate: Date
+): Promise<{val_id: number, val_amount: number}[]> {
     logger.info('Getting amounts from BigQuery for ' + valIds.length + ' pubkeys')
 
     const isGoerli = getIsGoerli()
+    const startDateString = startDate?.toISOString().slice(0,10)
     const endDateString = endDate?.toISOString().slice(0,10)
 
     const bigquery = new BigQuery()
@@ -24,8 +29,8 @@ export async function getRowsFromBigQuery(valIds: number[], endDate?: Date): Pro
     from \`p2p-data-warehouse.raw_ethereum.${isGoerli ? 'testnet_' : ''}validators_summary\`
     where 1=1
       and val_slashed != 1
-        and val_id IN (${valIds}) 
-            ${isGoerli ? '' : 'and epoch_date >= "2023-08-01"'}
+        and val_id IN (${valIds})
+            ${startDateString ? 'and epoch_date >= "' + startDateString + '"' : ''}
             ${endDateString ? 'and epoch_date <= "' + endDateString + '"' : ''}
 ),
 

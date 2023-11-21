@@ -2,7 +2,11 @@ import {getValidatorIndexesFromBigQuery} from "./getValidatorIndexesFromBigQuery
 import {getRowsFromBigQuery} from "./getRowsFromBigQuery";
 import {logger} from "./helpers/logger";
 
-export async function getClientOnlyClRewardsForPubkeys(pubkeys: string[], endDate: Date) {
+export async function getClientOnlyClRewardsForPubkeys(
+    pubkeys: string[],
+    startDate: Date,
+    endDate: Date
+) {
     logger.info('getClientOnlyClRewardsForPubkeys started')
 
     const chuckSize = 10000
@@ -18,7 +22,7 @@ export async function getClientOnlyClRewardsForPubkeys(pubkeys: string[], endDat
     logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes')
 
     const val_ids = pubkeysWithIndexes.map(r => r.val_id)
-    const indexesWithAmounts = await getRowsFromBigQuery(val_ids, endDate)
+    const indexesWithAmounts = await getRowsFromBigQuery(val_ids, startDate, endDate)
 
     const clientOnlyClRewards = indexesWithAmounts.reduce(
         (acc, item) => acc + item.val_amount, 0
