@@ -4,12 +4,22 @@ import {getBalance} from "./helpers/getBalance";
 import {ethers} from "ethers";
 import {predictFeeDistributorAddress} from "./predictFeeDistributorAddress";
 import {FeeDistributorToWithdraw} from "./models/FeeDistributorToWithdraw";
+import {getSsvFeeDistributorFactoryAddress} from "./ssv/getSsvFeeDistributorFactoryAddress";
+import {getP2pSsvProxyAddresses} from "./ssv/getP2pSsvProxyAddresses";
+import {getSsvFeeRecipientAddressesPerProxy} from "./ssv/getSsvFeeRecipientAddressesPerProxy";
 
 export async function getFeeDistributorsWithBalanceSsv() {
     logger.info('getFeeDistributorsWithBalanceSsv started')
 
     if (!process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI) {
         throw new Error("No MIN_BALANCE_TO_WITHDRAW_IN_GWEI in ENV")
+    }
+
+    const feeDistributorFactoryAddress = await getSsvFeeDistributorFactoryAddress()
+    const proxyAddresses = await getP2pSsvProxyAddresses()
+
+    for (const proxyAddress of proxyAddresses) {
+        const feeRecipientAddressesWithTimestamps = await getSsvFeeRecipientAddressesPerProxy(proxyAddress)
     }
 
     // 1. read P2pSsvProxyFactory getFeeDistributorFactory
