@@ -4,10 +4,14 @@ import {getFeeDistributorFactoryContract} from "./helpers/getFeeDistributorFacto
 export async function predictFeeDistributorAddress(input: FeeDistributorInput) {
     const factory = getFeeDistributorFactoryContract()
 
+    if (!input.identityParams) {
+        throw new Error('No identityParams')
+    }
+
     const feeDistributorAddress: string = await factory.predictFeeDistributorAddress(
-        input.referenceFeeDistributor,
-        input.clientConfig,
-        input.referrerConfig
+        input.identityParams.referenceFeeDistributor,
+        input.identityParams.clientConfig,
+        input.identityParams.referrerConfig
     )
 
     return feeDistributorAddress

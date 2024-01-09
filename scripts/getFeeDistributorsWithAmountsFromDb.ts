@@ -20,7 +20,8 @@ export async function getFeeDistributorsWithAmountsFromDb() {
         } else {
             const newEntry: FeeDistributorWithAmount = {
                 feeDistributor: validator.feeDistributor,
-                amount: validator.amount
+                amount: validator.amount,
+                identityParams: validator.identityParams
             }
 
             accumulator.push(newEntry);

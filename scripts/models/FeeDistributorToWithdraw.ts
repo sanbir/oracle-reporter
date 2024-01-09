@@ -1,14 +1,6 @@
-import {FeeRecipient} from "./FeeRecipient";
+import {BaseFeeDistributorToWithdraw} from "./BaseFeeDistributorToWithdraw";
+import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 
-export interface FeeDistributorToWithdraw {
-    address: string
-
-    referenceFeeDistributor: string
-    clientConfig: FeeRecipient
-    referrerConfig: FeeRecipient
-
-    pubkeys: string[]
-
-    startDateIso: Date
-    endDateIso: Date | null
+export interface FeeDistributorToWithdraw extends BaseFeeDistributorToWithdraw {
+    identityParams: FeeDistributorIdentityParams | null
 }

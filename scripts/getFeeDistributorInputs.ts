@@ -1,7 +1,6 @@
 import axios from "axios";
 import {logger} from "./helpers/logger";
 import {FeeDistributorInput} from "./models/FeeDistributorInput";
-import {FeeRecipient} from "./models/FeeRecipient";
 
 export async function getFeeDistributorInputs() {
     logger.info('getFeeDistributorInputs started')
@@ -9,9 +8,11 @@ export async function getFeeDistributorInputs() {
     // TODO!!!! Get from DB or API
     const feeDistributorInputs: FeeDistributorInput[] = [
         {
-            referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
-            clientConfig: {recipient: '0xf7F2A948119232fA16780ddCa0309D7A0C170eE2', basisPoints: 9500},
-            referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            identityParams: {
+                referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
+                clientConfig: {recipient: '0xf7F2A948119232fA16780ddCa0309D7A0C170eE2', basisPoints: 9500},
+                referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            },
 
             pubkeys: [
                 '0x802319c26f7e7880262f7d79ef6f4ce1a8318d640e4908ee2c01fda2f08c6c91e9c1c35635cde342d1161cf5dfe28c07',
@@ -22,9 +23,11 @@ export async function getFeeDistributorInputs() {
             endDateIsoString: '2023-10-30T08:32:56.673Z'
         },
         {
-            referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
-            clientConfig: {recipient: '0xf7F2A948119232fA16780ddCa0309D7A0C170eE2', basisPoints: 9000},
-            referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            identityParams: {
+                referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
+                clientConfig: {recipient: '0xf7F2A948119232fA16780ddCa0309D7A0C170eE2', basisPoints: 9000},
+                referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            },
 
             pubkeys: [
                 '0x802319c26f7e7880262f7d79ef6f4ce1a8318d640e4908ee2c01fda2f08c6c91e9c1c35635cde342d1161cf5dfe28c07',
@@ -35,9 +38,11 @@ export async function getFeeDistributorInputs() {
             endDateIsoString: '2023-10-20T08:32:56.673Z'
         },
         {
-            referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
-            clientConfig: {recipient: '0xdA795b000C29e6F47C2b2A5F3A35c5647695e301', basisPoints: 9500},
-            referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            identityParams: {
+                referenceFeeDistributor: '0x7109DeEb07aa9Eed1e2613F88b2f3E1e6C05163f',
+                clientConfig: {recipient: '0xdA795b000C29e6F47C2b2A5F3A35c5647695e301', basisPoints: 9500},
+                referrerConfig: {recipient: '0x0000000000000000000000000000000000000000', basisPoints: 0},
+            },
 
             pubkeys: [
                 '0x8051907630add535de983263f48df29c1c8b98ad5941d3b2ead3529201b992f650face62d34318c4cc6b054a68b6c79d',

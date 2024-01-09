@@ -1,4 +1,4 @@
-import {FeeRecipient} from "./FeeRecipient";
+import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 
 export interface ValidatorWithFeeDistributorsAndAmount {
     feeDistributor: string
@@ -6,7 +6,5 @@ export interface ValidatorWithFeeDistributorsAndAmount {
     val_id: number
     amount: number
 
-    referenceFeeDistributor: string
-    clientConfig: FeeRecipient
-    referrerConfig: FeeRecipient
+    identityParams: FeeDistributorIdentityParams | null
 }

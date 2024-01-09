@@ -44,10 +44,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
 
             validatorWithFeeDistributorsAndAmounts.push({
                 feeDistributor: ethers.utils.getAddress(fd.address),
-
-                referenceFeeDistributor: fd.referenceFeeDistributor,
-                clientConfig: fd.clientConfig,
-                referrerConfig: fd.referrerConfig,
+                identityParams: fd.identityParams,
 
                 pubkey: pubkeys[i],
                 val_id,

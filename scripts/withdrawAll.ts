@@ -25,7 +25,10 @@ export async function withdrawAll(feeDistributors: FeeDistributorWithAmount[], t
             const isDeployed = getIsContract(fd.feeDistributor)
 
             if (!isDeployed) {
-                const deployHash = await deployFeeDistributor(fd)
+                if (!fd.identityParams) {
+                    throw new Error('No identityParams for ' + fd.feeDistributor)
+                }
+                const deployHash = await deployFeeDistributor(fd.identityParams)
                 txHashesForFdAddresses.push({address: fd.feeDistributor, hash: deployHash})
             }
 

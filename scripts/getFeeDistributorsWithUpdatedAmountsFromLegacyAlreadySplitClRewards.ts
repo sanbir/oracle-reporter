@@ -22,10 +22,7 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
             const newEntry: FeeDistributorWithAmount = {
                 feeDistributor: validator.feeDistributor,
                 amount: validator.amount,
-
-                referenceFeeDistributor: validator.referenceFeeDistributor,
-                clientConfig: validator.clientConfig,
-                referrerConfig: validator.referrerConfig
+                identityParams: validator.identityParams
             }
 
             accumulator.push(newEntry);

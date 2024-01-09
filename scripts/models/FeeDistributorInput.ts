@@ -1,9 +1,7 @@
-import {FeeRecipient} from "./FeeRecipient";
+import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 
 export interface FeeDistributorInput {
-    referenceFeeDistributor: string
-    clientConfig: FeeRecipient
-    referrerConfig: FeeRecipient
+    identityParams: FeeDistributorIdentityParams | null
 
     pubkeys: string[]
 

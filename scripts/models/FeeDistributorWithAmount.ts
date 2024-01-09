@@ -1,10 +1,8 @@
-import {FeeRecipient} from "./FeeRecipient";
+import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 
 export interface FeeDistributorWithAmount {
     feeDistributor: string
     amount: number
 
-    referenceFeeDistributor: string
-    clientConfig: FeeRecipient
-    referrerConfig: FeeRecipient
+    identityParams: FeeDistributorIdentityParams | null
 }
