@@ -1,0 +1,17 @@
+import {logger} from "../helpers/logger";
+import {ethers} from "ethers";
+import {getSsvNetworkContract} from "../helpers/getSsvNetworkContract";
+
+export async function getSsvPubKeysPerProxy(proxyAddress: string) {
+    logger.info('getSsvPubKeysPerProxy started')
+
+    const ssvNetwork = getSsvNetworkContract()
+
+    const logs = await ssvNetwork.queryFilter(ssvNetwork.filters.ValidatorAdded(proxyAddress))
+
+    const publicKeys: string[] = logs.map(log => log.args?.publicKey)
+
+    logger.info('getSsvPubKeysPerProxy finished')
+
+    return publicKeys
+}
