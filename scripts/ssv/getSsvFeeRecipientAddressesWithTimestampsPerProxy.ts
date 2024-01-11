@@ -3,7 +3,7 @@ import {ethers} from "ethers";
 import {getSsvNetworkContract} from "../helpers/getSsvNetworkContract";
 
 export async function getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAddress: string) {
-    logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy started')
+    logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy started for ' + proxyAddress)
 
     const ssvNetwork = getSsvNetworkContract()
 
@@ -18,6 +18,8 @@ export async function getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAdd
             timestamp: new Date(block.timestamp * 1000) // Convert Unix timestamp to JavaScript Date
         };
     }));
+
+    logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy finished for ' + proxyAddress)
 
     return results
 }

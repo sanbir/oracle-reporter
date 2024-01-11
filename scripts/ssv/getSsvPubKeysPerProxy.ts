@@ -3,7 +3,7 @@ import {ethers} from "ethers";
 import {getSsvNetworkContract} from "../helpers/getSsvNetworkContract";
 
 export async function getSsvPubKeysPerProxy(proxyAddress: string) {
-    logger.info('getSsvPubKeysPerProxy started')
+    logger.info('getSsvPubKeysPerProxy started for ' + proxyAddress)
 
     const ssvNetwork = getSsvNetworkContract()
 
@@ -11,7 +11,7 @@ export async function getSsvPubKeysPerProxy(proxyAddress: string) {
 
     const publicKeys: string[] = logs.map(log => log.args?.publicKey)
 
-    logger.info('getSsvPubKeysPerProxy finished')
+    logger.info('getSsvPubKeysPerProxy finished for ' + proxyAddress)
 
     return publicKeys
 }
