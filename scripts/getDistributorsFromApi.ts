@@ -19,7 +19,7 @@ export async function getDistributorsFromApi() {
     //     "id": number,
     //     "referrer_fee_recipient": string,
     //     "session_id": string
-    // }
+    // }[]
 
     logger.info('getDistributorsFromApi finished')
     return DATA // array

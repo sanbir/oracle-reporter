@@ -1,10 +1,11 @@
 import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 
 export interface FeeDistributorInput {
+    fdAddress: string
     identityParams: FeeDistributorIdentityParams | null
 
     pubkeys: string[]
 
-    startDateIsoString: string
-    endDateIsoString: string | null
+    startDate: Date
+    endDate: Date
 }

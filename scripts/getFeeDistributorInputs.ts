@@ -11,7 +11,8 @@ export async function getFeeDistributorInputs() {
     }
 
     const proposers = await getProposers()
-    logger.info(Object.keys(proposers).length + ' pubkeys found')
+    const pubkeys = Object.keys(proposers)
+    logger.info(pubkeys.length + ' pubkeys found')
 
     const fromApi = await getDistributorsFromApi()
     logger.info(fromApi.length + ' distributors from API')
@@ -28,18 +29,41 @@ export async function getFeeDistributorInputs() {
     })
     logger.info(nonDuplicate.length + ' distributors without invoices and duplicates')
 
-    const feeDistributorInputs: FeeDistributorInput[] = nonDuplicate.map(d => ({
-        identityParams: {
-            referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
-            clientConfig: {recipient: d.client_fee_recipient, basisPoints: d.client_basis_points},
-            // @ts-ignore
-            referrerConfig: {recipient: d.referrer_fee_recipient, basisPoints: d['referrer_basis_points'] as number || 0}
-        },
+    const clientPubkeys = pubkeys.map(p => ({
+        pubkey: p,
         // @ts-ignore
-        pubkeys: Object.keys(proposers).filter(key => proposers[key].fee_recipient.toLowerCase() === d.address.toLowerCase()),
-        startDateIsoString: d.activated_at,
-        endDateIsoString: null
+        client: nonDuplicate.find(d => d.address.toLowerCase() === proposers[p].fee_recipient.toLowerCase())?.client_fee_recipient
     }))
+
+    // @ts-ignore
+    nonDuplicate.sort((a, b) => new Date(a.activated_at) - new Date(b.activated_at))
+
+    const now = new Date()
+
+    const feeDistributorInputs: FeeDistributorInput[] = nonDuplicate.map(d => {
+
+        const sameClientFds = nonDuplicate.filter(nd => nd.client_fee_recipient.toLowerCase() === d.client_fee_recipient.toLowerCase())
+
+        return {
+            fdAddress: d.address,
+
+            identityParams: {
+                referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
+                clientConfig: {recipient: d.client_fee_recipient, basisPoints: d.client_basis_points},
+                // @ts-ignore
+                referrerConfig: {recipient: d.referrer_fee_recipient, basisPoints: d['referrer_basis_points'] as number || 0}
+            },
+
+            pubkeys: clientPubkeys
+                .filter(cpk => cpk.client === d.client_fee_recipient.toLowerCase())
+                .map(cpk => cpk.pubkey),
+
+            startDate: new Date(d.activated_at),
+            endDate: sameClientFds.length === 1
+                ? now
+                : new Date(sameClientFds[sameClientFds.indexOf(d) + 1].activated_at)
+        }
+    })
 
     logger.info('getFeeDistributorInputs finished')
     return feeDistributorInputs

@@ -16,7 +16,7 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
 
     for (const input of feeDistributorInputs) {
         try {
-            const feeDistributorsAddress = await predictFeeDistributorAddress(input)
+            const feeDistributorsAddress = input.fdAddress || await predictFeeDistributorAddress(input)
 
             const balance = await getBalance(feeDistributorsAddress)
             logger.info(
@@ -42,8 +42,8 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
                 identityParams: input.identityParams,
                 pubkeys: input.pubkeys,
 
-                startDateIso: new Date(input.startDateIsoString),
-                endDateIso: input.endDateIsoString ? new Date(input.endDateIsoString) : null,
+                startDateIso: input.startDate,
+                endDateIso: input.endDate,
             })
         } catch (error) {
             logger.error(error)
