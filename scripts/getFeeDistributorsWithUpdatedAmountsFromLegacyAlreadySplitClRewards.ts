@@ -1,6 +1,6 @@
 import {getValidatorWithFeeDistributorsAndAmount} from "./getValidatorWithFeeDistributorsAndAmount";
 import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
-import {getLegacyAlreadySplitClRewards} from "./getLegacyAlreadySplitClRewards";
+import {getAlreadySplitClRewards} from "./getAlreadySplitClRewards";
 import {logger} from "./helpers/logger";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
@@ -36,9 +36,9 @@ export async function getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplit
     const feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards: FeeDistributorWithAmount[] = []
     for (const fd of feeDistributorsWithAmountsFromDb) {
         try {
-            const legacyAlreadySplitClRewards = await getLegacyAlreadySplitClRewards(fd.feeDistributor)
+            const alreadySplitClRewards = await getAlreadySplitClRewards(fd.feeDistributor)
 
-            const updatedAmount = fd.amount + legacyAlreadySplitClRewards
+            const updatedAmount = fd.amount + alreadySplitClRewards
 
             feeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards.push({
                 ...fd,

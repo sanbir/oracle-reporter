@@ -91,6 +91,8 @@ export async function getFeeDistributorsWithBalanceSsv() {
 
                 startDateIso: fd.from,
                 endDateIso: fd.from !== fd.to ? fd.to : null,
+
+                balance
             })
         } catch (error) {
             logger.error(error)

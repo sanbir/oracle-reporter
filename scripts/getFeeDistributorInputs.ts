@@ -42,7 +42,29 @@ export async function getFeeDistributorInputs() {
 
     const feeDistributorInputs: FeeDistributorInput[] = nonDuplicate.map(d => {
 
-        const sameClientFds = nonDuplicate.filter(nd => nd.client_fee_recipient.toLowerCase() === d.client_fee_recipient.toLowerCase())
+        // @ts-ignore
+        const referrerConfig = {recipient: d.referrer_fee_recipient, basisPoints: d['referrer_basis_points'] as number || 0}
+
+        const pubkeys = clientPubkeys
+            .filter(cpk => cpk.client?.toLowerCase() === d.client_fee_recipient.toLowerCase())
+            .map(cpk => cpk.pubkey)
+
+        let endDate = now
+
+        const sameClientFds = nonDuplicate.filter(
+            nd => nd.client_fee_recipient.toLowerCase() === d.client_fee_recipient.toLowerCase()
+                && nd.id !== d.id
+        )
+
+        if (sameClientFds.length) {
+            const laterFd = sameClientFds.find(
+                fd => new Date(fd.activated_at) > new Date(d.activated_at)
+            )
+
+            if (laterFd) {
+                endDate = new Date(laterFd.activated_at)
+            }
+        }
 
         return {
             fdAddress: d.address,
@@ -50,18 +72,13 @@ export async function getFeeDistributorInputs() {
             identityParams: {
                 referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
                 clientConfig: {recipient: d.client_fee_recipient, basisPoints: d.client_basis_points},
-                // @ts-ignore
-                referrerConfig: {recipient: d.referrer_fee_recipient, basisPoints: d['referrer_basis_points'] as number || 0}
+                referrerConfig
             },
 
-            pubkeys: clientPubkeys
-                .filter(cpk => cpk.client === d.client_fee_recipient.toLowerCase())
-                .map(cpk => cpk.pubkey),
+            pubkeys,
 
-            startDate: new Date(d.activated_at),
-            endDate: sameClientFds.length === 1
-                ? now
-                : new Date(sameClientFds[sameClientFds.indexOf(d) + 1].activated_at)
+            startDate: d.activated_at === "2024-01-31T00:00:00.000Z" ? new Date("2024-01-31T20:20:00.000Z") : new Date(d.activated_at),
+            endDate
         }
     })
 

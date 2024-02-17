@@ -44,6 +44,8 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
 
                 startDateIso: input.startDate,
                 endDateIso: input.endDate,
+
+                balance
             })
         } catch (error) {
             logger.error(error)
