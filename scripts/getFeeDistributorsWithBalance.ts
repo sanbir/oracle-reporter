@@ -4,6 +4,7 @@ import {getBalance} from "./helpers/getBalance";
 import {ethers} from "ethers";
 import {predictFeeDistributorAddress} from "./predictFeeDistributorAddress";
 import {FeeDistributorToWithdraw} from "./models/FeeDistributorToWithdraw";
+import {getSeconds} from "./helpers/getSeconds";
 
 export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDistributorInput[]) {
     logger.info('getFeeDistributorsWithBalance started')
@@ -11,6 +12,13 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
     if (!process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI) {
         throw new Error("No MIN_BALANCE_TO_WITHDRAW_IN_GWEI in ENV")
     }
+
+    const fdsWithoutBalance: {
+        clientAddress: string,
+        basisPoints: number,
+        start: Date,
+        end: Date
+    }[] = []
 
     const feeDistributorsWithBalance: FeeDistributorToWithdraw[] = []
 
@@ -33,6 +41,16 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
                     + feeDistributorsAddress
                     + ' is less than minimum to withdraw. Will not withdraw.'
                 )
+
+                if (input.identityParams) {
+                    fdsWithoutBalance.push({
+                        clientAddress: input.identityParams.clientConfig.recipient, basisPoints:
+                        input.identityParams.clientConfig.basisPoints,
+                        start: input.startDate,
+                        end: input.endDate
+                    })
+                }
+
                 continue
             }
 
@@ -49,6 +67,53 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
             })
         } catch (error) {
             logger.error(error)
+        }
+    }
+
+    if (fdsWithoutBalance.length) {
+        // @ts-ignore
+        fdsWithoutBalance.sort((a, b) => a.start - b.start)
+
+        for (const fdWithoutBalance of fdsWithoutBalance) {
+            const fdsWithBalance = feeDistributorsWithBalance.filter(
+                fd => fd.identityParams?.clientConfig.recipient === fdWithoutBalance.clientAddress
+            )
+
+            if (fdsWithBalance.length) {
+                // @ts-ignore
+                fdsWithBalance.sort((a, b) => a.startDateIso - b.startDateIso)
+
+                const closestFdWithBalance = fdsWithBalance.find(
+                    fdWithBalance => fdWithBalance.startDateIso > fdWithoutBalance.start
+                )
+
+                if (closestFdWithBalance && closestFdWithBalance.identityParams) {
+                    const fdsWithoutBalanceInBetween = fdsWithoutBalance.filter(
+                        fdWoBalance =>
+                            fdWoBalance.start > fdWithoutBalance.start && fdWoBalance.start < closestFdWithBalance.startDateIso
+                    )
+
+                    const totalSeconds =
+                        getSeconds(fdWithoutBalance.start) +
+                        getSeconds(closestFdWithBalance.startDateIso) +
+                        fdsWithoutBalanceInBetween.reduce(
+                            (_, f) => _ + getSeconds(f.start),
+                            0
+                        )
+
+                    const sumOfBasisPointsXseconds =
+                        getSeconds(fdWithoutBalance.start) * fdWithoutBalance.basisPoints +
+                        getSeconds(closestFdWithBalance.startDateIso) * closestFdWithBalance.identityParams.clientConfig.basisPoints +
+                        fdsWithoutBalanceInBetween.reduce(
+                            (_, f) => _ + getSeconds(f.start) * f.basisPoints,
+                            0
+                        )
+
+                    const weightedAvgBasisPoints = sumOfBasisPointsXseconds / totalSeconds
+
+                    closestFdWithBalance.startDateIso = fdWithoutBalance.start
+                }
+            }
         }
     }
 
