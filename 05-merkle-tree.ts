@@ -3,14 +3,14 @@ import {buildMerkleTreeForFeeDistributorAddress} from "./scripts/helpers/buildMe
 import {logger} from "./scripts/helpers/logger";
 import fs from "fs";
 import {
-    getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
-} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+    getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards
+} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards";
 import {getDatedJsonFilePath} from "./scripts/helpers/getDatedJsonFilePath";
 
 async function main() {
     logger.info('05-merkle-tree started')
 
-    const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
+    const fds = await getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards()
 
     const rewardData = fds.map(fd => {
         return [fd.feeDistributor, fd.amount.toString()]

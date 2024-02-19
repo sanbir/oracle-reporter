@@ -1,13 +1,13 @@
 import "dotenv/config"
 import {logger} from "./scripts/helpers/logger";
 import {
-    getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
-} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+    getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards
+} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards";
 
 async function main() {
     logger.info('03-fee-distributors-with-legacy-already-split-amounts started')
 
-    await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
+    await getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards()
 
     logger.info('03-fee-distributors-with-legacy-already-split-amounts finished')
 }

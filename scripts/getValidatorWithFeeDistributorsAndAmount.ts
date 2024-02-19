@@ -14,6 +14,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
     const feeDistributorInputs = await getFeeDistributorInputs()
 
     const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
+    logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
 
     const validatorWithFeeDistributorsAndAmounts: ValidatorWithFeeDistributorsAndAmount[] = []
 
@@ -36,7 +37,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
                 continue
             }
 
-            const amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
+            let amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
             if (!amount) {
                 logger.info('amount not found for ' + pubkeys[i])
                 continue
@@ -48,7 +49,10 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
 
                 pubkey: pubkeys[i],
                 val_id,
-                amount
+                amount,
+
+                newClientBasisPoints: fd.newClientBasisPoints,
+                fdBalance: fd.balance
             })
         }
     }

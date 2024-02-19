@@ -1,14 +1,14 @@
 import "dotenv/config"
 import {logger} from "./scripts/helpers/logger";
 import {
-    getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards
-} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards";
+    getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards
+} from "./scripts/getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards";
 import {getAllBalances} from "./scripts/getAllBalances";
 
 async function main() {
     logger.info('04-balances started')
 
-    const fds = await getFeeDistributorsWithUpdatedAmountsFromLegacyAlreadySplitClRewards()
+    const fds = await getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards()
 
     const feeDistributorsAddresses = fds.map(fd => fd.feeDistributor)
 

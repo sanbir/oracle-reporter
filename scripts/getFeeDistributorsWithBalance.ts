@@ -63,7 +63,8 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
                 startDateIso: input.startDate,
                 endDateIso: input.endDate,
 
-                balance
+                balance,
+                newClientBasisPoints: null
             })
         } catch (error) {
             logger.error(error)
@@ -71,6 +72,8 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
     }
 
     if (fdsWithoutBalance.length) {
+        logger.info(fdsWithoutBalance.length + ' fdsWithoutBalance')
+
         // @ts-ignore
         fdsWithoutBalance.sort((a, b) => a.start - b.start)
 
@@ -111,7 +114,10 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
 
                     const weightedAvgBasisPoints = sumOfBasisPointsXseconds / totalSeconds
 
+                    logger.info('weightedAvgBasisPoints for ' + closestFdWithBalance.address + ' is ' + weightedAvgBasisPoints)
+
                     closestFdWithBalance.startDateIso = fdWithoutBalance.start
+                    closestFdWithBalance.newClientBasisPoints = weightedAvgBasisPoints
                 }
             }
         }

@@ -12,4 +12,6 @@ export interface FeeDistributorToWithdraw {
     endDateIso: Date | null
 
     balance: ethers.BigNumber
+
+    newClientBasisPoints: number | null
 }

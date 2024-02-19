@@ -49,6 +49,8 @@ export async function getFeeDistributorInputs() {
             .filter(cpk => cpk.client?.toLowerCase() === d.client_fee_recipient.toLowerCase())
             .map(cpk => cpk.pubkey)
 
+        logger.info(pubkeys.length + ' pubkeys for ' + d.client_fee_recipient)
+
         let endDate = now
 
         const sameClientFds = nonDuplicate.filter(

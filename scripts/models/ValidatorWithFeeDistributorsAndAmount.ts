@@ -1,4 +1,5 @@
 import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
+import {ethers} from "ethers";
 
 export interface ValidatorWithFeeDistributorsAndAmount {
     feeDistributor: string
@@ -7,4 +8,7 @@ export interface ValidatorWithFeeDistributorsAndAmount {
     amount: number
 
     identityParams: FeeDistributorIdentityParams | null
+
+    newClientBasisPoints: number | null
+    fdBalance: ethers.BigNumber
 }
