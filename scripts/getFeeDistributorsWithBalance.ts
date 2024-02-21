@@ -43,12 +43,14 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
                 )
 
                 if (input.identityParams) {
-                    fdsWithoutBalance.push({
-                        clientAddress: input.identityParams.clientConfig.recipient, basisPoints:
-                        input.identityParams.clientConfig.basisPoints,
-                        start: input.startDate,
-                        end: input.endDate
-                    })
+                    if (input.endDate > new Date("2024-01-31T20:20:00.000Z")) {
+                        fdsWithoutBalance.push({
+                            clientAddress: input.identityParams.clientConfig.recipient, basisPoints:
+                            input.identityParams.clientConfig.basisPoints,
+                            start: input.startDate,
+                            end: input.endDate
+                        })
+                    }
                 }
 
                 continue
@@ -97,22 +99,24 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
                     )
 
                     const totalSeconds =
-                        getSeconds(fdWithoutBalance.start) +
-                        getSeconds(closestFdWithBalance.startDateIso) +
+                        getSeconds(fdWithoutBalance.end) - getSeconds(fdWithoutBalance.start) +
+                        getSeconds(closestFdWithBalance.endDateIso!) - getSeconds(closestFdWithBalance.startDateIso) +
                         fdsWithoutBalanceInBetween.reduce(
-                            (_, f) => _ + getSeconds(f.start),
+                            (_, f) => _ + getSeconds(f.end) - getSeconds(f.start),
                             0
                         )
 
                     const sumOfBasisPointsXseconds =
-                        getSeconds(fdWithoutBalance.start) * fdWithoutBalance.basisPoints +
-                        getSeconds(closestFdWithBalance.startDateIso) * closestFdWithBalance.identityParams.clientConfig.basisPoints +
+                        (getSeconds(fdWithoutBalance.end) - getSeconds(fdWithoutBalance.start))
+                            * fdWithoutBalance.basisPoints +
+                        (getSeconds(closestFdWithBalance.endDateIso!) - getSeconds(closestFdWithBalance.startDateIso))
+                            * closestFdWithBalance.identityParams.clientConfig.basisPoints +
                         fdsWithoutBalanceInBetween.reduce(
-                            (_, f) => _ + getSeconds(f.start) * f.basisPoints,
+                            (_, f) => _ + (getSeconds(f.end) - getSeconds(f.start)) * f.basisPoints,
                             0
                         )
 
-                    const weightedAvgBasisPoints = sumOfBasisPointsXseconds / totalSeconds
+                    const weightedAvgBasisPoints = Math.floor(sumOfBasisPointsXseconds / totalSeconds)
 
                     logger.info('weightedAvgBasisPoints for ' + closestFdWithBalance.address + ' is ' + weightedAvgBasisPoints)
 

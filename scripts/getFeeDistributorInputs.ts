@@ -2,6 +2,7 @@ import {logger} from "./helpers/logger";
 import {FeeDistributorInput} from "./models/FeeDistributorInput";
 import {getProposers} from "./getProposers";
 import {getDistributorsFromApi} from "./getDistributorsFromApi";
+import {DepositManagerApiDistributor} from "./models/DepositManagerApiDistributor";
 
 export async function getFeeDistributorInputs() {
     logger.info('getFeeDistributorInputs started')
@@ -20,14 +21,29 @@ export async function getFeeDistributorInputs() {
     const withoutInvoices = fromApi.filter(d => d.address !== d.client_fee_recipient)
     logger.info(withoutInvoices.length + ' distributors without invoices')
 
-    const nonDuplicate = withoutInvoices.filter((obj, index, self) => {
-        return index === self.findIndex((t) => (
-            t.address === obj.address
-            && t.client_basis_points === obj.client_basis_points
-            && t.activated_at === obj.activated_at
-        ))
-    })
+    const groupedByClient = withoutInvoices.reduce((acc: {[key: string]: DepositManagerApiDistributor[]}, item: DepositManagerApiDistributor) => {
+        const key = item.client_fee_recipient
+        if (!acc[key]) {
+            acc[key] = []
+        }
+        acc[key].push(item)
+        return acc
+    }, {})
+
+    const nonDuplicate: DepositManagerApiDistributor[] = []
+
+    Object.keys(groupedByClient).forEach(key => {
+        groupedByClient[key].sort((a, b) =>
+            new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime()
+        );
+
+        const nonDuplicateForClient = getNonDuplicates(groupedByClient[key])
+        nonDuplicate.push(...nonDuplicateForClient)
+    });
+
     logger.info(nonDuplicate.length + ' distributors without invoices and duplicates')
+
+    nonDuplicate.sort((a, b) => new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime())
 
     const clientPubkeys = pubkeys.map(p => ({
         pubkey: p,
@@ -35,15 +51,15 @@ export async function getFeeDistributorInputs() {
         client: nonDuplicate.find(d => d.address.toLowerCase() === proposers[p].fee_recipient.toLowerCase())?.client_fee_recipient
     }))
 
-    // @ts-ignore
-    nonDuplicate.sort((a, b) => new Date(a.activated_at) - new Date(b.activated_at))
-
     const now = new Date()
 
     const feeDistributorInputs: FeeDistributorInput[] = nonDuplicate.map(d => {
 
-        // @ts-ignore
-        const referrerConfig = {recipient: d.referrer_fee_recipient, basisPoints: d['referrer_basis_points'] as number || 0}
+        const referrerConfig = {
+            recipient: d.referrer_fee_recipient,
+            // @ts-ignore
+            basisPoints: d['referrer_basis_points'] as number || 0
+        }
 
         const pubkeys = clientPubkeys
             .filter(cpk => cpk.client?.toLowerCase() === d.client_fee_recipient.toLowerCase())
@@ -79,11 +95,33 @@ export async function getFeeDistributorInputs() {
 
             pubkeys,
 
-            startDate: d.activated_at === "2024-01-31T00:00:00.000Z" ? new Date("2024-01-31T20:20:00.000Z") : new Date(d.activated_at),
-            endDate
+            startDate: new Date(d.activated_at) <= new Date("2024-01-31T20:20:00.000Z")
+                ? new Date("2024-01-31T20:20:00.000Z")
+                : new Date(d.activated_at),
+
+            endDate: endDate <= new Date("2024-01-31T20:20:00.000Z")
+                ? new Date("2024-01-31T20:20:00.000Z")
+                : endDate
         }
     })
 
     logger.info('getFeeDistributorInputs finished')
     return feeDistributorInputs
+}
+
+function getNonDuplicates(withoutInvoices: DepositManagerApiDistributor[]) {
+    const result = [];
+    let lastUniqueCombo = null;
+
+    for (const item of withoutInvoices) {
+        const currentCombo = `${item.address}|${item.client_basis_points}`;
+
+        // If the current combination is different from the last unique combination
+        if (currentCombo !== lastUniqueCombo) {
+            result.push(item); // Include this item
+            lastUniqueCombo = currentCombo; // Update last unique combination
+        }
+    }
+
+    return result;
 }
