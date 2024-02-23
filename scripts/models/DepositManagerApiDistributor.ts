@@ -6,4 +6,6 @@ export interface DepositManagerApiDistributor {
     "id": number,
     "referrer_fee_recipient": string,
     "session_id": string
+
+    pubkeys: Set<string>
 }

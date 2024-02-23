@@ -19,7 +19,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
     const validatorWithFeeDistributorsAndAmounts: ValidatorWithFeeDistributorsAndAmount[] = []
 
     for (const fd of feeDistributorsWithBalance) {
-        const pubkeys = fd.pubkeys
+        const pubkeys = Array.from(fd.pubkeys)
 
         logger.info(pubkeys.length + ' pubkeys for ' + fd.address)
 

@@ -4,7 +4,7 @@ export interface FeeDistributorInput {
     fdAddress: string
     identityParams: FeeDistributorIdentityParams | null
 
-    pubkeys: string[]
+    pubkeys: Set<string>
 
     startDate: Date
     endDate: Date

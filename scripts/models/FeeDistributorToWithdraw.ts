@@ -6,7 +6,7 @@ export interface FeeDistributorToWithdraw {
 
     address: string
 
-    pubkeys: string[]
+    pubkeys: Set<string>
 
     startDateIso: Date
     endDateIso: Date | null

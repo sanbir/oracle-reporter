@@ -1,8 +1,8 @@
 import {logger} from "./helpers/logger";
 import {FeeDistributorInput} from "./models/FeeDistributorInput";
-import {getProposers} from "./getProposers";
 import {getDistributorsFromApi} from "./getDistributorsFromApi";
 import {DepositManagerApiDistributor} from "./models/DepositManagerApiDistributor";
+import {getPubkeysForSessionFromApi} from "./getPubkeysForSessionFromApi";
 
 export async function getFeeDistributorInputs() {
     logger.info('getFeeDistributorInputs started')
@@ -10,10 +10,6 @@ export async function getFeeDistributorInputs() {
     if (!process.env.REFERENCE_FEE_DISTRIBUTOR) {
         throw new Error("No REFERENCE_FEE_DISTRIBUTOR in ENV")
     }
-
-    const proposers = await getProposers()
-    const pubkeys = Object.keys(proposers)
-    logger.info(pubkeys.length + ' pubkeys found')
 
     const fromApi = await getDistributorsFromApi()
     logger.info(fromApi.length + ' distributors from API')
@@ -30,87 +26,77 @@ export async function getFeeDistributorInputs() {
         return acc
     }, {})
 
-    const nonDuplicate: DepositManagerApiDistributor[] = []
+    const now = new Date()
+    const feeDistributorInputs: FeeDistributorInput[] = []
 
-    Object.keys(groupedByClient).forEach(key => {
+    for (const key of Object.keys(groupedByClient)) {
         groupedByClient[key].sort((a, b) =>
             new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime()
         );
 
-        const nonDuplicateForClient = getNonDuplicates(groupedByClient[key])
-        nonDuplicate.push(...nonDuplicateForClient)
-    });
-
-    logger.info(nonDuplicate.length + ' distributors without invoices and duplicates')
-
-    nonDuplicate.sort((a, b) => new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime())
-
-    const clientPubkeys = pubkeys.map(p => ({
-        pubkey: p,
-        // @ts-ignore
-        client: nonDuplicate.find(d => d.address.toLowerCase() === proposers[p].fee_recipient.toLowerCase())?.client_fee_recipient
-    }))
-
-    const now = new Date()
-
-    const feeDistributorInputs: FeeDistributorInput[] = nonDuplicate.map(d => {
-
-        const referrerConfig = {
-            recipient: d.referrer_fee_recipient,
-            // @ts-ignore
-            basisPoints: d['referrer_basis_points'] as number || 0
+        for (const session of groupedByClient[key]) {
+            session.pubkeys = new Set(await getPubkeysForSessionFromApi(session.session_id))
         }
 
-        const pubkeys = clientPubkeys
-            .filter(cpk => cpk.client?.toLowerCase() === d.client_fee_recipient.toLowerCase())
-            .map(cpk => cpk.pubkey)
+        const nonDuplicateForClient = getNonDuplicates(groupedByClient[key])
+        nonDuplicateForClient.sort((a, b) => new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime())
 
-        logger.info(pubkeys.length + ' pubkeys for ' + d.client_fee_recipient)
+        const feeDistributorInputsForClient: FeeDistributorInput[] = nonDuplicateForClient.map(d => {
 
-        let endDate = now
+            const referrerConfig = {
+                recipient: d.referrer_fee_recipient,
+                // @ts-ignore
+                basisPoints: d['referrer_basis_points'] as number || 0
+            }
 
-        const sameClientFds = nonDuplicate.filter(
-            nd => nd.client_fee_recipient.toLowerCase() === d.client_fee_recipient.toLowerCase()
-                && nd.id !== d.id
-        )
+            logger.info(d.pubkeys.size + ' pubkeys for ' + d.client_fee_recipient)
 
-        if (sameClientFds.length) {
-            const laterFd = sameClientFds.find(
-                fd => new Date(fd.activated_at) > new Date(d.activated_at)
+            let endDate = now
+
+            const sameClientFds = nonDuplicateForClient.filter(
+                nd => nd.id !== d.id
             )
 
-            if (laterFd) {
-                endDate = new Date(laterFd.activated_at)
+            if (sameClientFds.length) {
+                const laterFd = sameClientFds.find(
+                    fd => new Date(fd.activated_at) > new Date(d.activated_at)
+                )
+
+                if (laterFd) {
+                    endDate = new Date(laterFd.activated_at)
+                }
             }
-        }
 
-        return {
-            fdAddress: d.address,
+            return {
+                fdAddress: d.address,
 
-            identityParams: {
-                referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
-                clientConfig: {recipient: d.client_fee_recipient, basisPoints: d.client_basis_points},
-                referrerConfig
-            },
+                identityParams: {
+                    referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
+                    clientConfig: {recipient: d.client_fee_recipient, basisPoints: d.client_basis_points},
+                    referrerConfig
+                },
 
-            pubkeys,
+                pubkeys: d.pubkeys,
 
-            startDate: new Date(d.activated_at) <= new Date("2024-01-31T20:20:00.000Z")
-                ? new Date("2024-01-31T20:20:00.000Z")
-                : new Date(d.activated_at),
+                startDate: new Date(d.activated_at) <= new Date("2024-01-31T20:20:00.000Z")
+                    ? new Date("2024-01-31T20:20:00.000Z")
+                    : new Date(d.activated_at),
 
-            endDate: endDate <= new Date("2024-01-31T20:20:00.000Z")
-                ? new Date("2024-01-31T20:20:00.000Z")
-                : endDate
-        }
-    })
+                endDate: endDate <= new Date("2024-01-31T20:20:00.000Z")
+                    ? new Date("2024-01-31T20:20:00.000Z")
+                    : endDate
+            }
+        })
+
+        feeDistributorInputs.push(...feeDistributorInputsForClient)
+    }
 
     logger.info('getFeeDistributorInputs finished')
     return feeDistributorInputs
 }
 
 function getNonDuplicates(withoutInvoices: DepositManagerApiDistributor[]) {
-    const result = [];
+    const result: DepositManagerApiDistributor[] = [];
     let lastUniqueCombo = null;
 
     for (const item of withoutInvoices) {
@@ -120,6 +106,10 @@ function getNonDuplicates(withoutInvoices: DepositManagerApiDistributor[]) {
         if (currentCombo !== lastUniqueCombo) {
             result.push(item); // Include this item
             lastUniqueCombo = currentCombo; // Update last unique combination
+        } else {
+            item.pubkeys.forEach(pk => {
+                result[result.length - 1].pubkeys.add(pk)
+            })
         }
     }
 

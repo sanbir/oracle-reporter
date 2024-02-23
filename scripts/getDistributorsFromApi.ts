@@ -18,7 +18,8 @@ export async function getDistributorsFromApi() : Promise<DepositManagerApiDistri
         "client_fee_recipient": string,
         "id": number,
         "referrer_fee_recipient": string,
-        "session_id": string
+        "session_id": string,
+        pubkeys: Set<string>
     }[]
 
     logger.info('getDistributorsFromApi finished')
