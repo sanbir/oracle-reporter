@@ -1,6 +1,6 @@
 import axios from "axios";
 import {logger} from "./helpers/logger";
-import {DepositManagerApiDistributor} from "./models/DepositManagerApiDistributor";
+import {DepositManagerApiSession} from "./models/DepositManagerApiSession";
 
 export async function getPubkeysForSessionFromApi(sessionId: string) : Promise<string[]> {
     logger.info('getPubkeysForSessionFromApi started')

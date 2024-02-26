@@ -1,9 +1,9 @@
 import axios from "axios";
 import {logger} from "./helpers/logger";
-import {DepositManagerApiDistributor} from "./models/DepositManagerApiDistributor";
+import {DepositManagerApiSession} from "./models/DepositManagerApiSession";
 
-export async function getDistributorsFromApi() : Promise<DepositManagerApiDistributor[]> {
-    logger.info('getDistributorsFromApi started')
+export async function getSessionsFromApi() : Promise<DepositManagerApiSession[]> {
+    logger.info('getSessionsFromApi started')
 
     if (!process.env.DISTRIBUTORS_URL) {
         throw new Error("No DISTRIBUTORS_URL in ENV")
@@ -22,6 +22,6 @@ export async function getDistributorsFromApi() : Promise<DepositManagerApiDistri
         pubkeys: Set<string>
     }[]
 
-    logger.info('getDistributorsFromApi finished')
+    logger.info('getSessionsFromApi finished')
     return array
 }

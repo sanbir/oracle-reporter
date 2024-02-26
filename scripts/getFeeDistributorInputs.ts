@@ -1,7 +1,7 @@
 import {logger} from "./helpers/logger";
 import {FeeDistributorInput} from "./models/FeeDistributorInput";
-import {getDistributorsFromApi} from "./getDistributorsFromApi";
-import {DepositManagerApiDistributor} from "./models/DepositManagerApiDistributor";
+import {getSessionsFromApi} from "./getSessionsFromApi";
+import {DepositManagerApiSession} from "./models/DepositManagerApiSession";
 import {getPubkeysForSessionFromApi} from "./getPubkeysForSessionFromApi";
 
 export async function getFeeDistributorInputs() {
@@ -11,13 +11,13 @@ export async function getFeeDistributorInputs() {
         throw new Error("No REFERENCE_FEE_DISTRIBUTOR in ENV")
     }
 
-    const fromApi = await getDistributorsFromApi()
-    logger.info(fromApi.length + ' distributors from API')
+    const sessionsFromApi = await getSessionsFromApi()
+    logger.info(sessionsFromApi.length + ' sessions from API')
 
-    const withoutInvoices = fromApi.filter(d => d.address !== d.client_fee_recipient)
-    logger.info(withoutInvoices.length + ' distributors without invoices')
+    const sessionsWithoutInvoices = sessionsFromApi.filter(d => d.address !== d.client_fee_recipient)
+    logger.info(sessionsWithoutInvoices.length + ' sessions without invoices')
 
-    const groupedByClient = withoutInvoices.reduce((acc: {[key: string]: DepositManagerApiDistributor[]}, item: DepositManagerApiDistributor) => {
+    const sessionsGroupedByClient = sessionsWithoutInvoices.reduce((acc: {[key: string]: DepositManagerApiSession[]}, item: DepositManagerApiSession) => {
         const key = item.client_fee_recipient
         if (!acc[key]) {
             acc[key] = []
@@ -29,19 +29,21 @@ export async function getFeeDistributorInputs() {
     const now = new Date()
     const feeDistributorInputs: FeeDistributorInput[] = []
 
-    for (const key of Object.keys(groupedByClient)) {
-        groupedByClient[key].sort((a, b) =>
+    for (const clientAddress of Object.keys(sessionsGroupedByClient)) {
+        const clientSessions = sessionsGroupedByClient[clientAddress]
+
+        clientSessions.sort((a, b) =>
             new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime()
         );
 
-        for (const session of groupedByClient[key]) {
+        for (const session of clientSessions) {
             session.pubkeys = new Set(await getPubkeysForSessionFromApi(session.session_id))
         }
 
-        const nonDuplicateForClient = getNonDuplicates(groupedByClient[key])
-        nonDuplicateForClient.sort((a, b) => new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime())
+        const fdsForPeriodForClient = squashPeriods(clientSessions)
+        fdsForPeriodForClient.sort((a, b) => new Date(a.activated_at).getTime() - new Date(b.activated_at).getTime())
 
-        const feeDistributorInputsForClient: FeeDistributorInput[] = nonDuplicateForClient.map(d => {
+        const feeDistributorInputsForClient: FeeDistributorInput[] = fdsForPeriodForClient.map(d => {
 
             const referrerConfig = {
                 recipient: d.referrer_fee_recipient,
@@ -53,7 +55,7 @@ export async function getFeeDistributorInputs() {
 
             let endDate = now
 
-            const sameClientFds = nonDuplicateForClient.filter(
+            const sameClientFds = fdsForPeriodForClient.filter(
                 nd => nd.id !== d.id
             )
 
@@ -95,8 +97,8 @@ export async function getFeeDistributorInputs() {
     return feeDistributorInputs
 }
 
-function getNonDuplicates(withoutInvoices: DepositManagerApiDistributor[]) {
-    const result: DepositManagerApiDistributor[] = [];
+function squashPeriods(withoutInvoices: DepositManagerApiSession[]) {
+    const result: DepositManagerApiSession[] = [];
     let lastUniqueCombo = null;
 
     for (const item of withoutInvoices) {

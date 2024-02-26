@@ -1,4 +1,4 @@
-export interface DepositManagerApiDistributor {
+export interface DepositManagerApiSession {
     "activated_at": string,
     "address": string,
     "client_basis_points": number,
