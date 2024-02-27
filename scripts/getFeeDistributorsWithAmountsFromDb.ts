@@ -22,21 +22,10 @@ export async function getFeeDistributorsWithAmountsFromDb() {
             const newEntry: FeeDistributorWithAmount = {
                 feeDistributor: validator.feeDistributor,
                 amount: validator.amount,
-                identityParams: validator.identityParams
-            }
+                identityParams: validator.identityParams,
 
-            if (validator.newClientBasisPoints) {
-                const amountInWei = ethers.BigNumber.from(newEntry.amount).mul(1e9)
-
-                const updatedAmountInWei = (
-                    ((validator.fdBalance.add(amountInWei)).mul(10000 - validator.newClientBasisPoints))
-                        .div(10000 - validator.identityParams?.clientConfig.basisPoints!)
-                ).sub(validator.fdBalance)
-
-                // New CL = ((EL + oldCL) * (10000 - new client Bp)) / (10000 - old client Bp) - EL
-
-                const updatedAmountInGWei = updatedAmountInWei.div(1e9)
-                newEntry.amount = updatedAmountInGWei.toNumber()
+                newClientBasisPoints: validator.newClientBasisPoints,
+                fdBalance: validator.fdBalance
             }
 
             accumulator.push(newEntry);
@@ -44,6 +33,27 @@ export async function getFeeDistributorsWithAmountsFromDb() {
 
         return accumulator;
     }, [])
+
+    feeDistributorsWithAmountsFromDb.forEach(fd => {
+        if (fd.newClientBasisPoints) {
+            logger.info(fd.feeDistributor + ' has newClientBasisPoints = ' + fd.newClientBasisPoints)
+            logger.info('Old fd.amount = ' + fd.amount)
+
+            const amountInWei = ethers.BigNumber.from(fd.amount).mul(1e9)
+
+            const updatedAmountInWei = (
+                ((fd.fdBalance.add(amountInWei)).mul(10000 - fd.newClientBasisPoints))
+                    .div(10000 - fd.identityParams?.clientConfig.basisPoints!)
+            ).sub(fd.fdBalance)
+
+            // New CL = ((EL + oldCL) * (10000 - new client Bp)) / (10000 - old client Bp) - EL
+
+            const updatedAmountInGWei = updatedAmountInWei.div(1e9)
+            fd.amount = updatedAmountInGWei.toNumber()
+
+            logger.info('New fd.amount = ' + fd.amount)
+        }
+    })
 
     const filePath = getDatedJsonFilePath('fee-distributors-with-amounts-from-db')
     logger.info('Saving fee-distributors-with-amounts-from-db to ' + filePath)
