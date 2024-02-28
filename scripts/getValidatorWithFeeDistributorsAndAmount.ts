@@ -18,6 +18,8 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
 
     const validatorWithFeeDistributorsAndAmounts: ValidatorWithFeeDistributorsAndAmount[] = []
 
+    const now = new Date()
+
     for (const fd of feeDistributorsWithBalance) {
         const pubkeys = Array.from(fd.pubkeys)
 
@@ -28,7 +30,7 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
         logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes for ' + fd.address)
 
         const val_ids = pubkeysWithIndexes.map(r => r.val_id)
-        const indexesWithAmounts = await getRowsFromBigQuery(val_ids, fd.startDateIso, fd.endDateIso || new Date())
+        const indexesWithAmounts = await getRowsFromBigQuery(val_ids, fd.startDateIso, fd.endDateIso || now)
 
         for (let i = 0; i < pubkeys.length; i++) {
             const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkeys[i])?.val_id
@@ -52,7 +54,10 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
                 amount,
 
                 newClientBasisPoints: fd.newClientBasisPoints,
-                fdBalance: fd.balance
+                fdBalance: fd.balance,
+
+                startDate: fd.startDateIso,
+                endDate: fd.endDateIso || now
             })
         }
     }

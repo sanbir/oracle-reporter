@@ -1,17 +1,15 @@
 import { withdrawErc4337 } from "./withdrawErc4337"
 import {StandardMerkleTree} from "@openzeppelin/merkle-tree";
-import {getBalance} from "./helpers/getBalance";
-import {ethers} from "ethers";
 import {logger} from "./helpers/logger";
 import {withdrawTx} from "./withdrawTx";
 import {getUse4337} from "./helpers/getUse4337";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
-import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
+import {FeeDistributorWithAmountForPeriod} from "./models/FeeDistributorWithAmountForPeriod";
 import {getIsContract} from "./helpers/getIsContract";
 import {deployFeeDistributor} from "./deployFeeDistributor";
 
-export async function withdrawAll(feeDistributors: FeeDistributorWithAmount[], tree: StandardMerkleTree<any[]>) {
+export async function withdrawAll(feeDistributors: FeeDistributorWithAmountForPeriod[], tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawAll started')
 
     if (!process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI) {

@@ -1,15 +1,13 @@
 import {FeeDistributorIdentityParams} from "./FeeDistributorIdentityParams";
 import {ethers} from "ethers";
 
-export interface ValidatorWithFeeDistributorsAndAmount {
+export interface FeeDistributorWithAmountForPeriod {
     feeDistributor: string
-    pubkey: string
-    val_id: number
     amount: number
 
     identityParams: FeeDistributorIdentityParams | null
 
-    newClientBasisPoints: number | null
+    newClientBasisPoints: number
     fdBalance: ethers.BigNumber
 
     startDate: Date

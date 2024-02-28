@@ -76,8 +76,7 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
     if (fdsWithoutBalance.length) {
         logger.info(fdsWithoutBalance.length + ' fdsWithoutBalance')
 
-        // @ts-ignore
-        fdsWithoutBalance.sort((a, b) => a.start - b.start)
+        fdsWithoutBalance.sort((a, b) => a.start.getTime() - b.start.getTime())
 
         for (const fdWithoutBalance of fdsWithoutBalance) {
             const fdsWithBalance = feeDistributorsWithBalance.filter(
@@ -85,8 +84,7 @@ export async function getFeeDistributorsWithBalance(feeDistributorInputs: FeeDis
             )
 
             if (fdsWithBalance.length) {
-                // @ts-ignore
-                fdsWithBalance.sort((a, b) => a.startDateIso - b.startDateIso)
+                fdsWithBalance.sort((a, b) => a.startDateIso.getTime() - b.startDateIso.getTime())
 
                 const closestFdWithBalance = fdsWithBalance.find(
                     fdWithBalance => fdWithBalance.startDateIso > fdWithoutBalance.start

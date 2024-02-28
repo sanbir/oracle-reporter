@@ -1,10 +1,9 @@
-import {getValidatorWithFeeDistributorsAndAmount} from "./getValidatorWithFeeDistributorsAndAmount";
-import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
 import {getAlreadySplitClRewards} from "./getAlreadySplitClRewards";
 import {logger} from "./helpers/logger";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
 import {getFeeDistributorsWithAmountsFromDb} from "./getFeeDistributorsWithAmountsFromDb";
+import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
 
 export async function getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards() {
     const feeDistributorsWithAmountsFromDb = await getFeeDistributorsWithAmountsFromDb()
@@ -16,7 +15,12 @@ export async function getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewa
         try {
             const alreadySplitClRewards = await getAlreadySplitClRewards(fd.feeDistributor)
 
+            logger.info(fd.feeDistributor + ' amount before alreadySplitClRewards = ' + fd.amount)
+            logger.info(fd.feeDistributor + ' alreadySplitClRewards = ' + alreadySplitClRewards)
+
             const updatedAmount = fd.amount + alreadySplitClRewards
+
+            logger.info(fd.feeDistributor + ' amount after alreadySplitClRewards = ' + updatedAmount)
 
             feeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards.push({
                 ...fd,
