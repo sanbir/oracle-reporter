@@ -7,6 +7,7 @@ import {withdrawTx} from "./withdrawTx";
 import {getUse4337} from "./helpers/getUse4337";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
+import {getHasRecentlyWithdrawn} from "./getHasRecentlyWithdrawn";
 
 export async function withdrawAll(feeDistributorsAddresses: string[], tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawAll started')
@@ -33,6 +34,15 @@ export async function withdrawAll(feeDistributorsAddresses: string[], tree: Stan
                     'Balance of '
                     + feeDistributorsAddress
                     + ' is less than minimum to withdraw. Will not withdraw.'
+                )
+                continue
+            }
+
+            const hasRecentlyWithdrawn = await getHasRecentlyWithdrawn(feeDistributorsAddress)
+            if (hasRecentlyWithdrawn) {
+                logger.info(
+                    + feeDistributorsAddress
+                    + ' has recently withdrawn. Will not withdraw.'
                 )
                 continue
             }

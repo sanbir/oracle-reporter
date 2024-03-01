@@ -26,6 +26,7 @@
     "05-merkle-tree": "ts-node 05-merkle-tree.ts",
     "06-report-root-to-oracle-contract.ts": "ts-node 06-report-root-to-oracle-contract.ts",
     "07-withdraw": "ts-node 07-withdraw.ts",
+    "97-test": "ts-node 97-test.ts",
     "start": "ts-node index.ts"
   }
 }

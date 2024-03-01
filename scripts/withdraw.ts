@@ -25,15 +25,15 @@ export async function withdraw() {
 
         const feeDistributorsAddresses = fds.map(fd => fd.feeDistributor)
 
-        const balancesBefore = await getAllBalances(feeDistributorsAddresses, 'balances-before')
+        //const balancesBefore = await getAllBalances(feeDistributorsAddresses, 'balances-before')
         await withdrawAll(feeDistributorsAddresses, tree)
-        const balancesAfter = await getAllBalances(feeDistributorsAddresses, 'balances-after')
-
-        const balancesDiff = await getBalancesDiff(balancesBefore, balancesAfter)
-        const balancesDiffPath = getDatedJsonFilePath('balances-diff')
-        logger.info('Saving balances diff to ' + balancesDiffPath)
-        fs.writeFileSync(balancesDiffPath, JSON.stringify(balancesDiff))
-        logger.info('Balances diff saved')
+        // const balancesAfter = await getAllBalances(feeDistributorsAddresses, 'balances-after')
+        //
+        // const balancesDiff = await getBalancesDiff(balancesBefore, balancesAfter)
+        // const balancesDiffPath = getDatedJsonFilePath('balances-diff')
+        // logger.info('Saving balances diff to ' + balancesDiffPath)
+        // fs.writeFileSync(balancesDiffPath, JSON.stringify(balancesDiff))
+        // logger.info('Balances diff saved')
     } catch (error) {
         logger.error(error)
     }
