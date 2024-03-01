@@ -1,15 +1,21 @@
-import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import {StandardMerkleTree} from "@openzeppelin/merkle-tree";
 import fs from "fs";
 import {withdrawAll} from "./withdrawAll";
-import {getAllBalances} from "./getAllBalances";
-import {getBalancesDiff} from "./getBalancesDiff";
 import {logger} from "./helpers/logger";
+import {setInitialNonce} from "./helpers/nonce";
+import * as path from "path";
 
 export async function reTryWithdrawWithExistingTree() {
     logger.info('reTryWithdrawWithExistingTree started')
 
-    const merkleTreeFilePath = getDatedJsonFilePath('merkle-tree')
+    await setInitialNonce()
+
+    console.log(path.dirname(process.argv[1]))
+
+    // @ts-ignore
+    const fds = JSON.parse(fs.readFileSync(path.dirname(process.argv[1]) + '/reports/fee-distributors-with-legacy-already-split-amounts2024-03-01T07:43:48.600Z.json'))
+
+    const merkleTreeFilePath = './reports/merkle-tree2024-03-01T07:43:48.600Z.json'
 
     // @ts-ignore
     const tree = StandardMerkleTree.load(JSON.parse(fs.readFileSync(merkleTreeFilePath)));
@@ -19,19 +25,7 @@ export async function reTryWithdrawWithExistingTree() {
 
     logger.info(feeDistributorsAddresses.length + ' feeDistributorsAddresses found in the tree file')
 
-    await withdrawAll(feeDistributorsAddresses, tree)
-
-    const balancesAfter = await getAllBalances(feeDistributorsAddresses, 'balances-after')
-
-    const balancesBeforeFilePath = getDatedJsonFilePath('balances-before')
-    // @ts-ignore
-    const balancesBefore = JSON.parse(fs.readFileSync(balancesBeforeFilePath))
-
-    const balancesDiff = await getBalancesDiff(balancesBefore, balancesAfter)
-    const balancesDiffPath = getDatedJsonFilePath('balances-diff')
-    logger.info('Saving balances diff to ' + balancesDiffPath)
-    fs.writeFileSync(balancesDiffPath, JSON.stringify(balancesDiff))
-    logger.info('Balances diff saved')
+    await withdrawAll(fds, tree)
 
     logger.info('reTryWithdrawWithExistingTree finished')
 }

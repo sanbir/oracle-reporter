@@ -26,6 +26,7 @@
     "05-merkle-tree": "ts-node 05-merkle-tree.ts",
     "06-report-root-to-oracle-contract.ts": "ts-node 06-report-root-to-oracle-contract.ts",
     "07-withdraw": "ts-node 07-withdraw.ts",
+    "98-re-try-withdraw": "ts-node 98-re-try-withdraw.ts",
     "99-get-fee-distributors-with-balance-ssv": "ts-node 99-get-fee-distributors-with-balance-ssv.ts",
     "start": "ts-node index.ts"
   }

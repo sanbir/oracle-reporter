@@ -5,11 +5,11 @@ import {withdrawTx} from "./withdrawTx";
 import {getUse4337} from "./helpers/getUse4337";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
-import {FeeDistributorWithAmountForPeriod} from "./models/FeeDistributorWithAmountForPeriod";
 import {getIsContract} from "./helpers/getIsContract";
 import {deployFeeDistributor} from "./deployFeeDistributor";
+import {FeeDistributorWithAmount} from "./models/FeeDistributorWithAmount";
 
-export async function withdrawAll(feeDistributors: FeeDistributorWithAmountForPeriod[], tree: StandardMerkleTree<any[]>) {
+export async function withdrawAll(feeDistributors: FeeDistributorWithAmount[], tree: StandardMerkleTree<any[]>) {
     logger.info('withdrawAll started')
 
     if (!process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI) {
@@ -20,7 +20,7 @@ export async function withdrawAll(feeDistributors: FeeDistributorWithAmountForPe
 
     for (const fd of feeDistributors) {
         try {
-            const isDeployed = getIsContract(fd.feeDistributor)
+            const isDeployed = await getIsContract(fd.feeDistributor)
 
             if (!isDeployed) {
                 if (!fd.identityParams) {

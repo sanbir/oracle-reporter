@@ -5,9 +5,12 @@ import {buildMerkleTreeForFeeDistributorAddress} from "./helpers/buildMerkleTree
 import {logger} from "./helpers/logger";
 import {makeOracleReport} from "./makeOracleReport";
 import {withdrawAll} from "./withdrawAll";
+import {setInitialNonce} from "./helpers/nonce";
 
 export async function withdraw() {
     try {
+        await setInitialNonce()
+
         const fds = await getFeeDistributorsWithUpdatedAmountsFromAlreadySplitClRewards()
 
         const rewardData = fds.map(fd => {
