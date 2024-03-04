@@ -28,6 +28,7 @@
     "07-withdraw": "ts-node 07-withdraw.ts",
     "98-re-try-withdraw": "ts-node 98-re-try-withdraw.ts",
     "99-get-fee-distributors-with-balance-ssv": "ts-node 99-get-fee-distributors-with-balance-ssv.ts",
+    "97-test": "ts-node 97-test.ts",
     "start": "ts-node index.ts"
   }
 }
