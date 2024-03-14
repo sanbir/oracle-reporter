@@ -12,16 +12,13 @@ export async function getFeeDistributorInputs() {
     }
 
     const fdAddressesWithPeriodsFromApi = await getFdAddressesWithPeriodsFromApi()
-    logger.info(fdAddressesWithPeriodsFromApi.length + ' fd addresses with periods from API')
-
     const fsAddresses = Object.keys(fdAddressesWithPeriodsFromApi)
+    logger.info(fsAddresses.length + ' fd addresses with periods from API')
 
     const now = new Date()
     const startDate = new Date(Number(process.env.DISTRIBUTORS_URL!.split('/').pop()))
 
-    const feeDistributorInputs: FeeDistributorInput[] = []
-
-    const feeDistributorInputsForClient: FeeDistributorInput[] = fsAddresses.map(fdAddress => {
+    const feeDistributorInputs: FeeDistributorInput[] = fsAddresses.map(fdAddress => {
         const periodsFromApi = fdAddressesWithPeriodsFromApi[fdAddress]
 
         const first = periodsFromApi[0]
