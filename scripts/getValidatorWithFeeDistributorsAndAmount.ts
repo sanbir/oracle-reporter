@@ -1,8 +1,6 @@
 import {getValidatorIndexesFromBigQuery} from "./getValidatorIndexesFromBigQuery";
 import {getRowsFromBigQuery} from "./getRowsFromBigQuery";
-import {ValidatorWithFeeDistributorsAndAmount} from "./models/ValidatorWithFeeDistributorsAndAmount";
 import {logger} from "./helpers/logger";
-import {ethers} from "ethers";
 import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
 import {getFeeDistributorInputs} from "./getFeeDistributorInputs";
@@ -16,62 +14,59 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
     const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
     logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
 
-    const validatorWithFeeDistributorsAndAmounts: ValidatorWithFeeDistributorsAndAmount[] = []
-
-    const now = new Date()
-
     for (const fd of feeDistributorsWithBalance) {
-        const pubkeys = Array.from(fd.pubkeys)
+        let fdAmount = 0
 
-        logger.info(pubkeys.length + ' pubkeys for ' + fd.address)
+        for (const period of fd.periods) {
+            const pubkeys = period.pubkeys
 
-        const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
+            logger.info(pubkeys.length + ' pubkeys for ' + fd.fdAddress + ' '
+              + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+            )
 
-        logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes for ' + fd.address)
+            const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
 
-        const val_ids = pubkeysWithIndexes.map(r => r.val_id)
-        const indexesWithAmounts = await getRowsFromBigQuery(val_ids, fd.startDateIso, fd.endDateIso || now)
+            logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes for ' + fd.fdAddress + ' '
+              + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+            )
 
-        for (let i = 0; i < pubkeys.length; i++) {
-            const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkeys[i])?.val_id
-            if (!val_id) {
-                logger.info('val_id not found for ' + pubkeys[i])
-                continue
+            const val_ids = pubkeysWithIndexes.map(r => r.val_id)
+            const indexesWithAmounts = await getRowsFromBigQuery(
+              val_ids,
+              period.startDate,
+              period.endDate
+            )
+
+            let periodAmount = 0
+
+            for (const pubkey of pubkeys) {
+                const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkey)?.val_id
+                if (!val_id) {
+                    logger.info('val_id not found for ' + pubkey)
+                    continue
+                }
+
+                let amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
+                if (!amount) {
+                    logger.info('amount not found for ' + pubkey)
+                    continue
+                }
+
+                logger.info(pubkey + ' amount = ' + amount)
+
+                periodAmount += amount
             }
 
-            let amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
-            if (!amount) {
-                logger.info('amount not found for ' + pubkeys[i])
-                continue
-            }
-
-            validatorWithFeeDistributorsAndAmounts.push({
-                feeDistributor: ethers.utils.getAddress(fd.address),
-                identityParams: fd.identityParams,
-
-                pubkey: pubkeys[i],
-                val_id,
-                amount,
-
-                newClientBasisPoints: fd.newClientBasisPoints,
-                fdBalance: fd.balance,
-
-                startDate: fd.startDateIso,
-                endDate: fd.endDateIso || now
-            })
+            fdAmount += periodAmount
         }
+
+        fd.amount = fdAmount
     }
 
     const filePath = getDatedJsonFilePath('amounts-for-pubkeys')
     logger.info('Saving amounts-for-pubkeys to ' + filePath)
-    fs.writeFileSync(filePath, JSON.stringify(validatorWithFeeDistributorsAndAmounts))
+    fs.writeFileSync(filePath, JSON.stringify(feeDistributorsWithBalance))
     logger.info('amounts-for-pubkeys saved')
 
-    logger.info(
-        'getValidatorWithFeeDistributorsAndAmount finished with '
-        + validatorWithFeeDistributorsAndAmounts.length
-        + ' validators'
-    )
-
-    return validatorWithFeeDistributorsAndAmounts
+    return feeDistributorsWithBalance
 }

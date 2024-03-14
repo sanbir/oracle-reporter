@@ -15,7 +15,7 @@ export async function getFeeDistributorsWithBalanceSsv() {
         throw new Error("No MIN_BALANCE_TO_WITHDRAW_IN_GWEI in ENV")
     }
 
-    const feeDistributors: {recipientAddress: string, from: Date, to: Date | null, pubkeys: string[]}[] = []
+    const periods: {recipientAddress: string, from: Date, to: Date | null, pubkeys: string[]}[] = []
 
     const proxyAddresses = await getP2pSsvProxyAddresses()
 
@@ -57,18 +57,20 @@ export async function getFeeDistributorsWithBalanceSsv() {
             pubkeys
         }))
 
-        feeDistributors.push(...feeDistributorsPerProxy)
+        periods.push(...feeDistributorsPerProxy)
     }
+
+    const now = new Date()
 
     const feeDistributorsWithBalance: FeeDistributorToWithdraw[] = []
 
-    for (const fd of feeDistributors) {
+    for (const period of periods) {
         try {
 
-            const balance = await getBalance(fd.recipientAddress)
+            const balance = await getBalance(period.recipientAddress)
             logger.info(
                 'Balance of '
-                + fd.recipientAddress
+                + period.recipientAddress
                 + ' is '
                 + ethers.utils.formatUnits(balance, "ether")
                 + 'ETH'
@@ -77,23 +79,31 @@ export async function getFeeDistributorsWithBalanceSsv() {
             if (balance.lt(ethers.utils.parseUnits(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI, "gwei"))) {
                 logger.info(
                     'Balance of '
-                    + fd.recipientAddress
+                    + period.recipientAddress
                     + ' is less than minimum to withdraw. Will not withdraw.'
                 )
                 continue
             }
 
-            feeDistributorsWithBalance.push({
-                address: fd.recipientAddress,
+            const existingFd = feeDistributorsWithBalance.find(f => f.fdAddress === period.recipientAddress)
+            const currentPeriod = {
+                pubkeys: period.pubkeys,
+                startDate: period.from,
+                endDate: period.to && period.from !== period.to ? period.to : now
+            }
 
-                identityParams: null,
-                pubkeys: fd.pubkeys,
-
-                startDateIso: fd.from,
-                endDateIso: fd.from !== fd.to ? fd.to : null,
-
-                balance
-            })
+            if (existingFd) {
+                existingFd.periods.push(currentPeriod)
+            } else {
+                feeDistributorsWithBalance.push({
+                    fdAddress: period.recipientAddress,
+                    identityParams: null,
+                    balance,
+                    periods: [currentPeriod],
+                    newClientBasisPoints: null,
+                    amount: 0
+                })
+            }
         } catch (error) {
             logger.error(error)
         }
