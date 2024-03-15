@@ -24,40 +24,53 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
               + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
             )
 
-            const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
+            try {
+                const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
 
-            logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes for ' + fd.fdAddress + ' '
-              + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
-            )
+                logger.info(pubkeysWithIndexes.length + ' pubkeysWithIndexes for ' + fd.fdAddress + ' '
+                  + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+                )
 
-            const val_ids = pubkeysWithIndexes.map(r => r.val_id)
-            const indexesWithAmounts = await getRowsFromBigQuery(
-              val_ids,
-              period.startDate,
-              period.endDate
-            )
-
-            let periodAmount = 0
-
-            for (const pubkey of pubkeys) {
-                const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkey)?.val_id
-                if (!val_id) {
-                    logger.info('val_id not found for ' + pubkey)
+                if (!pubkeysWithIndexes.length) {
+                    logger.info('Cannnot proceed without pubkeysWithIndexes. Skipping...')
                     continue
                 }
 
-                let amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
-                if (!amount) {
-                    logger.info('amount not found for ' + pubkey)
-                    continue
+                const val_ids = pubkeysWithIndexes.map(r => r.val_id)
+                const indexesWithAmounts = await getRowsFromBigQuery(
+                  val_ids,
+                  period.startDate,
+                  period.endDate
+                )
+
+                let periodAmount = 0
+
+                for (const pubkey of pubkeys) {
+                    const val_id = pubkeysWithIndexes.find(r => r.val_pubkey === pubkey)?.val_id
+                    if (!val_id) {
+                        logger.info('val_id not found for ' + pubkey)
+                        continue
+                    }
+
+                    let amount = indexesWithAmounts.find(r => r.val_id === val_id)?.val_amount
+                    if (!amount) {
+                        logger.info('amount not found for ' + pubkey)
+                        continue
+                    }
+
+                    logger.info(pubkey + ' amount = ' + amount)
+
+                    periodAmount += amount
                 }
 
-                logger.info(pubkey + ' amount = ' + amount)
+                fdAmount += periodAmount
+            } catch (error) {
+                logger.error('Error happenned ' + error + ' for ' + fd.fdAddress + ' '
+                  + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+                )
 
-                periodAmount += amount
+                throw error
             }
-
-            fdAmount += periodAmount
         }
 
         fd.amount = fdAmount

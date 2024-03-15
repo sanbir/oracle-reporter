@@ -3,6 +3,8 @@ import {FeeDistributorInput} from "./models/FeeDistributorInput";
 import {getFdAddressesWithPeriodsFromApi} from "./getFdAddressesWithPeriodsFromApi";
 import { ethers } from "ethers"
 import { Period } from "./models/Period"
+import { FdWithPeriodFromApi } from "./models/FdWithPeriodFromApi"
+import { getProposers } from "./getProposers"
 
 export async function getFeeDistributorInputs() {
     logger.info('getFeeDistributorInputs started')
@@ -11,12 +13,15 @@ export async function getFeeDistributorInputs() {
         throw new Error("No REFERENCE_FEE_DISTRIBUTOR in ENV")
     }
 
-    const fdAddressesWithPeriodsFromApi = await getFdAddressesWithPeriodsFromApi()
+    const withManual = await getFdAddressesWithPeriodsFromApi()
+    logger.info(Object.keys(withManual).length + ' fd addresses with periods from API with manual')
+
+    const fdAddressesWithPeriodsFromApi = await filterManualSetup(withManual)
     const fsAddresses = Object.keys(fdAddressesWithPeriodsFromApi)
     logger.info(fsAddresses.length + ' fd addresses with periods from API')
 
     const now = new Date()
-    const startDate = new Date(Number(process.env.DISTRIBUTORS_URL!.split('/').pop()))
+    const startDate = new Date(1709279021642)
 
     const feeDistributorInputs: FeeDistributorInput[] = fsAddresses.map(fdAddress => {
         const periodsFromApi = fdAddressesWithPeriodsFromApi[fdAddress]
@@ -43,7 +48,7 @@ export async function getFeeDistributorInputs() {
               : now,
 
             pubkeys: pa.validators
-        }))
+        })).filter(p => p.startDate < p.endDate)
 
         periods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
 
@@ -62,5 +67,28 @@ export async function getFeeDistributorInputs() {
 
     logger.info('getFeeDistributorInputs finished')
     return feeDistributorInputs
+}
+
+async function filterManualSetup(fds: Record<string, FdWithPeriodFromApi[]>): Promise<Record<string, FdWithPeriodFromApi[]>> {
+    const proposers = await getProposers()
+    const filteredFds = {};
+
+    Object.entries(fds).forEach(([ethAddress, detailsArray]) => {
+        const filteredDetails = detailsArray.filter(details => {
+            const validators = details.validators;
+
+            const matchingProposers = Object.entries(proposers)
+              .filter(([, proposerDetails]) => proposerDetails.fee_recipient === ethAddress);
+
+            return matchingProposers.every(([pubkey]) => validators.includes(pubkey));
+        });
+
+        if (filteredDetails.length > 0) {
+            // @ts-ignore
+            filteredFds[ethAddress] = filteredDetails;
+        }
+    });
+
+    return filteredFds
 }
 
