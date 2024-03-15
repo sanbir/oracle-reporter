@@ -14,7 +14,7 @@ export async function getHasRecentlyWithdrawn(fdAddress: string) {
 
     const filter = {
         address: fdAddress,
-        fromBlock: 19335220,
+        fromBlock: 19440408,
         toBlock: 'latest',
         topics: [ eventSignature ]
     };
