@@ -12,6 +12,9 @@ export async function getFeeDistributorInputs() {
     if (!process.env.REFERENCE_FEE_DISTRIBUTOR) {
         throw new Error("No REFERENCE_FEE_DISTRIBUTOR in ENV")
     }
+    if (!process.env.START_TIMESTAMP) {
+        throw new Error("No START_TIMESTAMP in ENV")
+    }
 
     const withManual = await getFdAddressesWithPeriodsFromApi()
     logger.info(Object.keys(withManual).length + ' fd addresses with periods from API with manual')
@@ -21,7 +24,7 @@ export async function getFeeDistributorInputs() {
     logger.info(fsAddresses.length + ' fd addresses with periods from API')
 
     const now = new Date()
-    const startDate = new Date(1709279021642)
+    const startDate = new Date(Number(process.env.START_TIMESTAMP))
 
     const feeDistributorInputs: FeeDistributorInput[] = fsAddresses.map(fdAddress => {
         const periodsFromApi = fdAddressesWithPeriodsFromApi[fdAddress]
