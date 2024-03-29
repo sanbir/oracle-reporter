@@ -5,6 +5,7 @@ import {getDatedJsonFilePath} from "./helpers/getDatedJsonFilePath";
 import fs from "fs";
 import {getFeeDistributorInputs} from "./getFeeDistributorInputs";
 import {getFeeDistributorsWithBalance} from "./getFeeDistributorsWithBalance";
+import { getFeeDistributorsWithBalanceSsv } from "./getFeeDistributorsWithBalanceSsv"
 
 export async function getValidatorWithFeeDistributorsAndAmount() {
     logger.info('getValidatorWithFeeDistributorsAndAmount started')
@@ -13,6 +14,11 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
 
     const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
     logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
+
+    const feeDistributorsWithBalanceSsv = await getFeeDistributorsWithBalanceSsv()
+    logger.info(feeDistributorsWithBalanceSsv.length + ' feeDistributorsWithBalanceSsv')
+
+    feeDistributorsWithBalance.push(...feeDistributorsWithBalanceSsv)
 
     for (const fd of feeDistributorsWithBalance) {
         let fdAmount = 0
