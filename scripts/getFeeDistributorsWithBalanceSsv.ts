@@ -43,7 +43,10 @@ export async function getFeeDistributorsWithBalanceSsv() {
 
             for (const [otherAddress, otherTimestamp] of Object.entries(minTimestampsByRecipient)) {
                 if (otherAddress !== recipientAddress) {
-                    if (groupedByRecipientAddress[recipientAddress].to === null || otherTimestamp < groupedByRecipientAddress[recipientAddress].to!) {
+                    if (
+                      (groupedByRecipientAddress[recipientAddress].to === null && groupedByRecipientAddress[recipientAddress].from < otherTimestamp) ||
+                      (otherTimestamp < groupedByRecipientAddress[recipientAddress].to!)
+                    ) {
                         groupedByRecipientAddress[recipientAddress].to = otherTimestamp;
                     }
                 }
