@@ -20,6 +20,10 @@ export async function withdrawAll(feeDistributors: FeeDistributorToWithdraw[], t
 
     for (const fd of feeDistributors) {
         try {
+            if (fd.fdAddress.toLowerCase() === '0xa136329Bb4c0Af09C5Ad20449E4eb8b60fE65F19'.toLowerCase()) {
+                throw new Error('Corrupted address 0xa136329Bb4c0Af09C5Ad20449E4eb8b60fE65F19')
+            }
+
             const isDeployed = await getIsContract(fd.fdAddress)
 
             if (!isDeployed) {
