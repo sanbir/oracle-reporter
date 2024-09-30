@@ -12,11 +12,19 @@ export async function getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAdd
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
 
     const results = await Promise.all(logs.map(async (log) => {
-        const block = await provider.getBlock(log.blockNumber);
-        return {
-            recipientAddress: log.args?.recipientAddress,
-            timestamp: new Date(block.timestamp * 1000) // Convert Unix timestamp to JavaScript Date
-        };
+        try {
+            const block = await provider.getBlock(log.blockNumber);
+            return {
+                recipientAddress: log.args?.recipientAddress,
+                timestamp: new Date(block.timestamp * 1000) // Convert Unix timestamp to JavaScript Date
+            };
+        } catch (error) {
+            logger.error(error)
+            return {
+                recipientAddress: ethers.constants.AddressZero,
+                timestamp: new Date()
+            };
+        }
     }));
 
     logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy finished for ' + proxyAddress)

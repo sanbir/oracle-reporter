@@ -6,24 +6,15 @@ import fs from "fs";
 import {getFeeDistributorInputs} from "./getFeeDistributorInputs";
 import {getFeeDistributorsWithBalance} from "./getFeeDistributorsWithBalance";
 import { getFeeDistributorsWithBalanceSsv } from "./getFeeDistributorsWithBalanceSsv"
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree"
+import { FeeDistributorToWithdraw } from "./models/FeeDistributorToWithdraw"
 
 export async function getValidatorWithFeeDistributorsAndAmount() {
     logger.info('getValidatorWithFeeDistributorsAndAmount started')
 
-    const feeDistributorInputs = await getFeeDistributorInputs()
-
-    const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
-    logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
-
-    const filePath_feeDistributorsWithBalance = getDatedJsonFilePath('feeDistributorsWithBalance')
-    logger.info('Saving feeDistributorsWithBalance to ' + filePath_feeDistributorsWithBalance)
-    fs.writeFileSync(filePath_feeDistributorsWithBalance, JSON.stringify(feeDistributorsWithBalance))
-    logger.info('feeDistributorsWithBalance saved')
-
-    const feeDistributorsWithBalanceSsv = await getFeeDistributorsWithBalanceSsv()
-    logger.info(feeDistributorsWithBalanceSsv.length + ' feeDistributorsWithBalanceSsv')
-
-    feeDistributorsWithBalance.push(...feeDistributorsWithBalanceSsv)
+    const pathhh = './reports/feeDistributorsWithBalance_12024-09-30T12:21:33.851Z.json'
+    // @ts-ignore
+    const feeDistributorsWithBalance: FeeDistributorToWithdraw[] = JSON.parse(fs.readFileSync(pathhh));
 
     for (const fd of feeDistributorsWithBalance) {
         let fdAmount = 0
@@ -31,9 +22,18 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
         for (const period of fd.periods) {
             const pubkeys = period.pubkeys
 
-            logger.info(pubkeys.length + ' pubkeys for ' + fd.fdAddress + ' '
-              + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
-            )
+            try {
+                logger.info(pubkeys.length + ' pubkeys for ' + fd.fdAddress + ' '
+                  + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+                )
+            } catch (err) {
+                period.startDate = new Date(period.startDate)
+                period.endDate = new Date(period.endDate)
+
+                logger.info(pubkeys.length + ' pubkeys for ' + fd.fdAddress + ' '
+                  + period.startDate.toISOString() + ' ' + period.endDate.toISOString()
+                )
+            }
 
             try {
                 const pubkeysWithIndexes = await getValidatorIndexesFromBigQuery(pubkeys)
