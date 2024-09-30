@@ -15,6 +15,11 @@ export async function getValidatorWithFeeDistributorsAndAmount() {
     const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
     logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
 
+    const filePath_feeDistributorsWithBalance = getDatedJsonFilePath('feeDistributorsWithBalance')
+    logger.info('Saving feeDistributorsWithBalance to ' + filePath_feeDistributorsWithBalance)
+    fs.writeFileSync(filePath_feeDistributorsWithBalance, JSON.stringify(feeDistributorsWithBalance))
+    logger.info('feeDistributorsWithBalance saved')
+
     const feeDistributorsWithBalanceSsv = await getFeeDistributorsWithBalanceSsv()
     logger.info(feeDistributorsWithBalanceSsv.length + ' feeDistributorsWithBalanceSsv')
 
