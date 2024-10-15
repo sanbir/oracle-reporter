@@ -7,7 +7,7 @@ export async function getSsvPubKeysPerProxy(proxyAddress: string) { // same for 
 
     const ssvNetwork = getSsvNetworkContract()
 
-    const logs = await ssvNetwork.queryFilter(ssvNetwork.filters.ValidatorAdded(proxyAddress))
+    const logs = await ssvNetwork.queryFilter(ssvNetwork.filters.ValidatorAdded(proxyAddress), 19326041, "latest")
 
     const publicKeys: string[] = logs.map(log => log.args?.publicKey)
 
