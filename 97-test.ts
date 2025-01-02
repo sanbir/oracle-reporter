@@ -4,13 +4,16 @@ import {getRowsFromBigQuery} from "./scripts/getRowsFromBigQuery";
 import { getFeeDistributorInputs } from "./scripts/getFeeDistributorInputs"
 import { getFdAddressesWithPeriodsFromApi } from "./scripts/getFdAddressesWithPeriodsFromApi"
 import { getLastDistributionDate } from "./scripts/helpers/getLastDistributionDate"
+import {
+    getSsvFeeRecipientAddressesWithTimestampsPerProxy
+} from "./scripts/ssv/getSsvFeeRecipientAddressesWithTimestampsPerProxy"
 
 async function main() {
     logger.info('97-test started')
 
     // const fds = await test_getRowsFromBigQuery()
 
-    const aa = await getLastDistributionDate('0x21ca9c89C704138Eb350eBF73E973E6ACd4351F8')
+    const aa = await getSsvFeeRecipientAddressesWithTimestampsPerProxy('0xc2d42368d94E2D5d82F3b05a06Ec53eBFb81Ce0f')
 
     logger.info('97-test finished')
 }
