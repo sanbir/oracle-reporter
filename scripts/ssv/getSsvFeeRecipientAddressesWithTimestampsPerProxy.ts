@@ -3,27 +3,39 @@ import {ethers} from "ethers";
 import {getSsvNetworkContract} from "../helpers/getSsvNetworkContract";
 import { sleep } from "../helpers/sleep"
 
-export async function getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAddress: string) { // same for 3.1
-    logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy started for ' + proxyAddress)
+export async function getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAddress: string)
+  : Promise<{   recipientAddress: any,   timestamp: Date }[]> { // same for 3.1
+    try {
 
-    await sleep(1200)
+        logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy started for ' + proxyAddress)
 
-    const ssvNetwork = getSsvNetworkContract()
+        await sleep(1600)
 
-    const logs = await ssvNetwork.queryFilter(ssvNetwork.filters.FeeRecipientAddressUpdated(proxyAddress), 19536041, "latest")
+        const ssvNetwork = getSsvNetworkContract()
 
-    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
+        const logs = await ssvNetwork.queryFilter(ssvNetwork.filters.FeeRecipientAddressUpdated(proxyAddress), 19536041, "latest")
 
-    const results = await Promise.all(logs.map(async (log) => {
-        await sleep(1200)
-        const block = await provider.getBlock(log.blockNumber);
-        return {
-            recipientAddress: log.args?.recipientAddress,
-            timestamp: new Date(block.timestamp * 1000) // Convert Unix timestamp to JavaScript Date
-        };
-    }));
+        const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL)
 
-    logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy finished for ' + proxyAddress)
+        const results = await Promise.all(logs.map(async (log) => {
+            await sleep(1600)
+            const block = await provider.getBlock(log.blockNumber);
+            return {
+                recipientAddress: log.args?.recipientAddress,
+                timestamp: new Date(block.timestamp * 1000) // Convert Unix timestamp to JavaScript Date
+            };
+        }));
 
-    return results
+        logger.info('getSsvFeeRecipientAddressesWithTimestampsPerProxy finished for ' + proxyAddress)
+
+        return results
+    } catch (error) {
+        logger.error(error)
+
+        logger.info('Sleeping for 5 sec...')
+        await sleep(5000)
+        logger.info('Re-trying ' + proxyAddress)
+
+        return await getSsvFeeRecipientAddressesWithTimestampsPerProxy(proxyAddress)
+    }
 }
