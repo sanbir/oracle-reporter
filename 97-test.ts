@@ -11,53 +11,81 @@ import { NewFd } from "./scripts/models/NewFd"
 import { getFeeDistributorContract } from "./scripts/helpers/getFeeDistributorContract"
 import { getDatedJsonFilePath } from "./scripts/helpers/getDatedJsonFilePath"
 import fs from "fs"
+import path from "path"
 
 async function main() {
     logger.info('97-test started')
 
-    const {feeDistributorInputs, now} = await getFeeDistributorInputs()
-
     const newFds: NewFd[] = []
 
-    for (const fd of feeDistributorInputs) {
-        if (fd.identityParams) {
-            const active = fd.periods.find(p => p.endDate === now)
-            if (active) {
-                const f = getFeeDistributorContract(fd.fdAddress)
-                try {
-                    const clientBasisPoints = await f.clientBasisPoints()
-                } catch (e){
-                    const sameClientFd = newFds.find(
-                      nfd => nfd.clientAddress.toLowerCase() === fd.identityParams?.clientConfig.recipient.toLowerCase()
-                    )
-                    if (sameClientFd) {
-                        sameClientFd.oldFeeDistributors.push(
-                          {
-                              address: fd.fdAddress,
-                              clientBasisPoints: fd.identityParams.clientConfig.basisPoints,
-                              type: 'middleware'
-                          }
-                        )
-                    } else {
-                        newFds.push({
-                            newFeeDistributorAddress: "",
-                            clientAddress: fd.identityParams.clientConfig.recipient,
-                            oldFeeDistributors: [
-                                {
-                                    address: fd.fdAddress,
-                                    clientBasisPoints: fd.identityParams.clientConfig.basisPoints,
-                                    type: 'middleware'
-                                }
-                            ]
-                        })
-                    }
-                }
-            }
-        }
+    // @ts-ignore
+    const FdsManual: NewFd[] = JSON.parse(fs.readFileSync('./FdsManual.json'))
+    // @ts-ignore
+    const FdsMiddlewareDeployed: NewFd[] = JSON.parse(fs.readFileSync('./FdsMiddlewareDeployed.json'))
+    // @ts-ignore
+    const FdsMiddlewarePredicted: NewFd[] = JSON.parse(fs.readFileSync('./FdsMiddlewarePredicted.json'))
+    // @ts-ignore
+    const FdsSsvNew: NewFd[] = JSON.parse(fs.readFileSync('./FdsSsvNew.json'))
+    // @ts-ignore
+    const FdsSsvOld: NewFd[] = JSON.parse(fs.readFileSync('./FdsSsvOld.json'))
 
+    for (const f of FdsManual) {
+        const existingClient = newFds.find(fd => fd.clientAddress === f.clientAddress)
+        if (existingClient) {
+            existingClient.oldFeeDistributors.push(...f.oldFeeDistributors)
+        } else {
+            newFds.push(f)
+        }
+    }
+    for (const f of FdsMiddlewareDeployed) {
+        const existingClient = newFds.find(fd => fd.clientAddress === f.clientAddress)
+        if (existingClient) {
+            existingClient.oldFeeDistributors.push(...f.oldFeeDistributors)
+        } else {
+            newFds.push(f)
+        }
+    }
+    for (const f of FdsMiddlewarePredicted) {
+        const existingClient = newFds.find(fd => fd.clientAddress === f.clientAddress)
+        if (existingClient) {
+            existingClient.oldFeeDistributors.push(...f.oldFeeDistributors)
+        } else {
+            newFds.push(f)
+        }
+    }
+    for (const f of FdsSsvNew) {
+        const existingClient = newFds.find(fd => fd.clientAddress === f.clientAddress)
+        if (existingClient) {
+            existingClient.oldFeeDistributors.push(...f.oldFeeDistributors)
+        } else {
+            newFds.push(f)
+        }
+    }
+    for (const f of FdsSsvOld) {
+        const existingClient = newFds.find(fd => fd.clientAddress === f.clientAddress)
+        if (existingClient) {
+            existingClient.oldFeeDistributors.push(...f.oldFeeDistributors)
+        } else {
+            newFds.push(f)
+        }
     }
 
-    const filePath = getDatedJsonFilePath('newFds')
+    newFds.forEach(n => {
+        n.oldFeeDistributors = n.oldFeeDistributors.filter(o => o.address !== n.oldFeeDistributors[0].address || o === n.oldFeeDistributors[0])
+    })
+
+    logger.info('separate',
+      FdsManual.length +
+      FdsMiddlewareDeployed.length +
+      FdsMiddlewarePredicted.length +
+      FdsSsvNew.length +
+      FdsSsvOld.length
+    )
+    logger.info('together',
+      newFds.length
+    )
+
+    const filePath = getDatedJsonFilePath('ALLFds')
     logger.info('Saving newFds to ' + filePath)
     fs.writeFileSync(filePath, JSON.stringify(newFds))
     logger.info('newFds saved')
