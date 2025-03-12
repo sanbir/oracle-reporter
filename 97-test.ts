@@ -7,13 +7,60 @@ import { getLastDistributionDate } from "./scripts/helpers/getLastDistributionDa
 import {
     getSsvFeeRecipientAddressesWithTimestampsPerProxy
 } from "./scripts/ssv/getSsvFeeRecipientAddressesWithTimestampsPerProxy"
+import { NewFd } from "./scripts/models/NewFd"
+import { getFeeDistributorContract } from "./scripts/helpers/getFeeDistributorContract"
+import { getDatedJsonFilePath } from "./scripts/helpers/getDatedJsonFilePath"
+import fs from "fs"
 
 async function main() {
     logger.info('97-test started')
 
-    // const fds = await test_getRowsFromBigQuery()
+    const {feeDistributorInputs, now} = await getFeeDistributorInputs()
 
-    const aa = await getSsvFeeRecipientAddressesWithTimestampsPerProxy('0xc2d42368d94E2D5d82F3b05a06Ec53eBFb81Ce0f')
+    const newFds: NewFd[] = []
+
+    for (const fd of feeDistributorInputs) {
+        if (fd.identityParams) {
+            const active = fd.periods.find(p => p.endDate === now)
+            if (active) {
+                const f = getFeeDistributorContract(fd.fdAddress)
+                try {
+                    const clientBasisPoints = await f.clientBasisPoints()
+                } catch (e){
+                    const sameClientFd = newFds.find(
+                      nfd => nfd.clientAddress.toLowerCase() === fd.identityParams?.clientConfig.recipient.toLowerCase()
+                    )
+                    if (sameClientFd) {
+                        sameClientFd.oldFeeDistributors.push(
+                          {
+                              address: fd.fdAddress,
+                              clientBasisPoints: fd.identityParams.clientConfig.basisPoints,
+                              type: 'middleware'
+                          }
+                        )
+                    } else {
+                        newFds.push({
+                            newFeeDistributorAddress: "",
+                            clientAddress: fd.identityParams.clientConfig.recipient,
+                            oldFeeDistributors: [
+                                {
+                                    address: fd.fdAddress,
+                                    clientBasisPoints: fd.identityParams.clientConfig.basisPoints,
+                                    type: 'middleware'
+                                }
+                            ]
+                        })
+                    }
+                }
+            }
+        }
+
+    }
+
+    const filePath = getDatedJsonFilePath('newFds')
+    logger.info('Saving newFds to ' + filePath)
+    fs.writeFileSync(filePath, JSON.stringify(newFds))
+    logger.info('newFds saved')
 
     logger.info('97-test finished')
 }

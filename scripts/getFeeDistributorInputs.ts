@@ -63,7 +63,7 @@ export async function getFeeDistributorInputs() {
     })
 
     logger.info('getFeeDistributorInputs finished')
-    return feeDistributorInputs
+    return {feeDistributorInputs, now}
 }
 
 async function filterManualSetup(fds: Record<string, FdWithPeriodFromApi[]>): Promise<Record<string, FdWithPeriodFromApi[]>> {
