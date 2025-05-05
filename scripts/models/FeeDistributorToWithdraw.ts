@@ -5,4 +5,5 @@ export interface FeeDistributorToWithdraw extends FeeDistributorInput {
     amount: number
     balance: ethers.BigNumber
     newClientBasisPoints: number | null
+    proxy: string
 }

@@ -7,6 +7,7 @@ async function main() {
 
     try {
         const fds = await getFeeDistributorsWithBalanceSsv()
+        logger.info('02-fee-distributors-with-balance-ssv finished')
     } catch (error) {
         logger.error(error)
     }

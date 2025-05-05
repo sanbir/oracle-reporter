@@ -16,7 +16,7 @@ export async function getFeeDistributorsWithBalanceSsv() {
         throw new Error("No MIN_BALANCE_TO_WITHDRAW_IN_GWEI in ENV")
     }
 
-    const periods: {recipientAddress: string, from: Date, to: Date | null, pubkeys: string[]}[] = []
+    const periods: {recipientAddress: string, from: Date, to: Date | null, pubkeys: string[], proxy: string}[] = []
 
     const proxyAddresses = await getP2pSsvProxyAddresses()
     const proxyAddresses_3_1 = await getP2pSsvProxyAddresses_3_1()
@@ -60,7 +60,8 @@ export async function getFeeDistributorsWithBalanceSsv() {
             recipientAddress,
             from: groupedByRecipientAddress[recipientAddress].from,
             to: groupedByRecipientAddress[recipientAddress].to,
-            pubkeys
+            pubkeys: pubkeys,
+            proxy: proxyAddress
         }))
 
         periods.push(...feeDistributorsPerProxy)
@@ -107,7 +108,8 @@ export async function getFeeDistributorsWithBalanceSsv() {
                     balance,
                     periods: [currentPeriod],
                     newClientBasisPoints: null,
-                    amount: 0
+                    amount: 0,
+                    proxy: period.proxy
                 })
             }
         } catch (error) {
