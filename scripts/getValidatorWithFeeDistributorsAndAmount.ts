@@ -11,20 +11,32 @@ import { getLastDistributionDate } from "./helpers/getLastDistributionDate"
 export async function getValidatorWithFeeDistributorsAndAmount() {
     logger.info('getValidatorWithFeeDistributorsAndAmount started')
 
-    const feeDistributorInputs = await getFeeDistributorInputs()
+    // let feeDistributorInputs = await getFeeDistributorInputs()
+    //
+    // logger.info('feeDistributorInputs count', feeDistributorInputs.length)
 
-    const feeDistributorsWithBalance = await getFeeDistributorsWithBalance(feeDistributorInputs)
-    logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
-
-    const filePath_feeDistributorsWithBalance = getDatedJsonFilePath('feeDistributorsWithBalance')
-    logger.info('Saving feeDistributorsWithBalance to ' + filePath_feeDistributorsWithBalance)
-    fs.writeFileSync(filePath_feeDistributorsWithBalance, JSON.stringify(feeDistributorsWithBalance))
-    logger.info('feeDistributorsWithBalance saved')
+    let feeDistributorsWithBalance = [] //await getFeeDistributorsWithBalance(feeDistributorInputs)
+    // logger.info(feeDistributorsWithBalance.length + ' feeDistributorsWithBalance')
+    //
+    // const filePath_feeDistributorsWithBalance = getDatedJsonFilePath('feeDistributorsWithBalance')
+    // logger.info('Saving feeDistributorsWithBalance to ' + filePath_feeDistributorsWithBalance)
+    // fs.writeFileSync(filePath_feeDistributorsWithBalance, JSON.stringify(feeDistributorsWithBalance))
+    // logger.info('feeDistributorsWithBalance saved')
 
     const feeDistributorsWithBalanceSsv = await getFeeDistributorsWithBalanceSsv()
     logger.info(feeDistributorsWithBalanceSsv.length + ' feeDistributorsWithBalanceSsv')
 
     feeDistributorsWithBalance.push(...feeDistributorsWithBalanceSsv)
+
+    feeDistributorsWithBalance = feeDistributorsWithBalance.filter(fd =>
+      fd.fdAddress.toLowerCase() === '0x33858b7Db7D0f8986B138aa430703b88FeD64971'.toLowerCase() ||
+      fd.fdAddress.toLowerCase() === '0xFC42dC2244E78a8A3b39f63608A7c28b7EC06973'.toLowerCase() ||
+      fd.fdAddress.toLowerCase() === '0x6C027ca67b36F36704ae7950679CFf639A05ec8D'.toLowerCase() ||
+      fd.fdAddress.toLowerCase() === '0x56009B0cEBD8336CcfE20E4bC1059F67033922F1'.toLowerCase() ||
+      fd.fdAddress.toLowerCase() === '0xa4fA38F3cae331041cf93A88730C6595cBC447a2'.toLowerCase()
+    )
+
+    logger.info('feeDistributorsWithBalance count', feeDistributorsWithBalance.length)
 
     for (const fd of feeDistributorsWithBalance) {
         let fdAmount = 0
