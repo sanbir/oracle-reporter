@@ -1,6 +1,6 @@
 import {logger} from "./helpers/logger";
 import {getBalance} from "./helpers/getBalance";
-import {ethers} from "ethers";
+import { BigNumber, ethers } from "ethers"
 import {FeeDistributorToWithdraw} from "./models/FeeDistributorToWithdraw";
 import {getP2pSsvProxyAddresses} from "./ssv/getP2pSsvProxyAddresses";
 import {getP2pSsvProxyAddresses_3_1} from "./ssv/getP2pSsvProxyAddresses_3_1";
@@ -73,23 +73,23 @@ export async function getFeeDistributorsWithBalanceSsv() {
     for (const period of periods) {
         try {
 
-            const balance = await getBalance(period.recipientAddress)
-            logger.info(
-                'Balance of '
-                + period.recipientAddress
-                + ' is '
-                + ethers.utils.formatUnits(balance, "ether")
-                + 'ETH'
-            )
-
-            if (balance.lt(ethers.utils.parseUnits(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI, "gwei"))) {
-                logger.info(
-                    'Balance of '
-                    + period.recipientAddress
-                    + ' is less than minimum to withdraw. Will not withdraw.'
-                )
-                continue
-            }
+            // const balance = await getBalance(period.recipientAddress)
+            // logger.info(
+            //     'Balance of '
+            //     + period.recipientAddress
+            //     + ' is '
+            //     + ethers.utils.formatUnits(balance, "ether")
+            //     + 'ETH'
+            // )
+            //
+            // if (balance.lt(ethers.utils.parseUnits(process.env.MIN_BALANCE_TO_WITHDRAW_IN_GWEI, "gwei"))) {
+            //     logger.info(
+            //         'Balance of '
+            //         + period.recipientAddress
+            //         + ' is less than minimum to withdraw. Will not withdraw.'
+            //     )
+            //     continue
+            // }
 
             const existingFd = feeDistributorsWithBalance.find(f => f.fdAddress === period.recipientAddress)
             const currentPeriod = {
@@ -104,7 +104,7 @@ export async function getFeeDistributorsWithBalanceSsv() {
                 feeDistributorsWithBalance.push({
                     fdAddress: period.recipientAddress,
                     identityParams: null,
-                    balance,
+                    balance: BigNumber.from(0),
                     periods: [currentPeriod],
                     newClientBasisPoints: null,
                     amount: 0

@@ -7,6 +7,13 @@ async function main() {
 
     try {
         const fds = await getFeeDistributorsWithBalanceSsv()
+
+        const aa = fds.map(fd => ({
+            fdAddress: fd.fdAddress,
+            pubkeys: fd.periods[fd.periods.length - 1].pubkeys
+        }))
+
+        console.log(JSON.stringify(aa));
     } catch (error) {
         logger.error(error)
     }
