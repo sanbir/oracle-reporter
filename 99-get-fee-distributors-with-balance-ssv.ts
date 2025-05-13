@@ -1,6 +1,7 @@
 import "dotenv/config"
 import {logger} from "./scripts/helpers/logger";
 import {getFeeDistributorsWithBalanceSsv} from "./scripts/getFeeDistributorsWithBalanceSsv";
+import fs from "fs"
 
 async function main() {
     logger.info('99-get-fee-distributors-with-balance-ssv started')
@@ -14,6 +15,8 @@ async function main() {
         }))
 
         console.log(JSON.stringify(aa));
+
+        fs.writeFileSync("SSVFdPubkeys.json", JSON.stringify(aa));
     } catch (error) {
         logger.error(error)
     }
