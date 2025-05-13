@@ -5,6 +5,7 @@ import { ethers } from "ethers"
 import { Period } from "./models/Period"
 import { FdWithPeriodFromApi } from "./models/FdWithPeriodFromApi"
 import { getProposers } from "./getProposers"
+import { getAddress } from "ethers/lib/utils"
 
 export async function getFeeDistributorInputs() {
     logger.info('getFeeDistributorInputs started')
@@ -17,7 +18,7 @@ export async function getFeeDistributorInputs() {
     logger.info(Object.keys(withManual).length + ' fd addresses with periods from API with manual')
 
     const fdAddressesWithPeriodsFromApi = await filterManualSetup(withManual)
-    const fsAddresses = Object.keys(fdAddressesWithPeriodsFromApi)
+    const fsAddresses = Object.keys(fdAddressesWithPeriodsFromApi)// .map(ad => (ad))
     logger.info(fsAddresses.length + ' fd addresses with periods from API')
 
     const now = new Date()
@@ -50,7 +51,7 @@ export async function getFeeDistributorInputs() {
         periods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
 
         return {
-            fdAddress: ethers.utils.getAddress(fdAddress),
+            fdAddress: ethers.utils.getAddress(fdAddress.toLowerCase()),
 
             identityParams: {
                 referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
@@ -75,7 +76,7 @@ async function filterManualSetup(fds: Record<string, FdWithPeriodFromApi[]>): Pr
             const validators = details.validators;
 
             const matchingProposers = Object.entries(proposers)
-              .filter(([, proposerDetails]) => proposerDetails.fee_recipient === ethAddress);
+              .filter(([, proposerDetails]) => getAddress(proposerDetails.fee_recipient.toLowerCase()) === getAddress(ethAddress.toLowerCase()));
 
             return matchingProposers.every(([pubkey]) => validators.includes(pubkey));
         });

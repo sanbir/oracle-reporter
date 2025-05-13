@@ -18,6 +18,7 @@ import { deployDeoracleizedFeeDistributorSSV } from "./scripts/deployDeoracleize
 import { predictDeoracleizedFeeDistributorSSV } from "./scripts/predictDeoracleizedFeeDistributorSSV"
 import { predictDeoracleizedFeeDistributor } from "./scripts/predictDeoracleizedFeeDistributor"
 import { setInitialNonce } from "./scripts/helpers/nonce"
+import { getIsContract } from "./scripts/helpers/getIsContract"
 
 async function main() {
     logger.info('97-test started')
@@ -94,15 +95,15 @@ async function main() {
     )
 
     for (const newFd of newFds) {
-        if (newFd.oldFeeDistributors[0].type === "ssvOld" || newFd.oldFeeDistributors[0].type === "ssvNew") {
-            const newFeeDistributorAddress = await predictDeoracleizedFeeDistributorSSV(newFd.clientAddress)
-            await deployDeoracleizedFeeDistributorSSV(newFd.clientAddress)
-            newFd.newFeeDistributorAddress = newFeeDistributorAddress
-        } else {
-            const newFeeDistributorAddress = await predictDeoracleizedFeeDistributor(newFd.clientAddress)
+        const newFeeDistributorAddress = await predictDeoracleizedFeeDistributor(newFd.clientAddress)
+
+        const isContract = await getIsContract(newFeeDistributorAddress)
+
+        if (!isContract) {
             await deployDeoracleizedFeeDistributor(newFd.clientAddress)
-            newFd.newFeeDistributorAddress = newFeeDistributorAddress
         }
+
+        newFd.newFeeDistributorAddress = newFeeDistributorAddress
     }
 
     const filePath = getDatedJsonFilePath('ALLFds')

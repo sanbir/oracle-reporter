@@ -18,8 +18,8 @@ export async function getFeeDistributorsWithBalanceSsv() {
 
     const periods: {recipientAddress: string, from: Date, to: Date | null, pubkeys: string[]}[] = []
 
-    // const proxyAddresses = await getP2pSsvProxyAddresses()
-    const proxyAddresses = await getP2pSsvProxyAddresses_3_1()
+    const proxyAddresses = await getP2pSsvProxyAddresses()
+    // const proxyAddresses = await getP2pSsvProxyAddresses_3_1()
     // proxyAddresses.push(...proxyAddresses_3_1)
 
     for (const proxyAddress of proxyAddresses) {
