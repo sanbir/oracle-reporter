@@ -1,26 +1,35 @@
 import {BigQuery} from "@google-cloud/bigquery";
 import {logger} from "./helpers/logger";
 import {getIsGoerli} from "./helpers/getIsGoerli";
+import { sleep } from "./helpers/sleep"
 
 export async function getValidatorIndexesFromBigQuery(val_pubkeys: string[]): Promise<{val_id: number, val_pubkey: string}[]> {
-    logger.info('Getting indexes from BigQuery for ' + val_pubkeys.length + ' pubkeys')
+    try {
+        logger.info('Getting indexes from BigQuery for ' + val_pubkeys.length + ' pubkeys')
 
-    const isGoerli = getIsGoerli()
+        const isGoerli = getIsGoerli()
 
-    const bigquery = new BigQuery()
+        const bigquery = new BigQuery()
 
-    const query = `
-        SELECT val_id, val_pubkey FROM \`p2p-data-warehouse.raw_ethereum.${isGoerli ? 'testnet_' : ''}validators_index\`
-        WHERE val_pubkey IN (${"'" + val_pubkeys.join("','") + "'"})
-    `
+        const query = `
+            SELECT val_id, val_pubkey
+            FROM \`p2p-data-warehouse.raw_ethereum.${isGoerli ? 'testnet_' : ''}validators_index\`
+            WHERE val_pubkey IN (${"'" + val_pubkeys.join("','") + "'"})
+        `
 
-    const [job] = await bigquery.createQueryJob({
-        query: query,
-        location: "US"
-    })
-    const [rows] = await job.getQueryResults()
+        const [job] = await bigquery.createQueryJob({
+            query: query,
+            location: "US"
+        })
+        const [rows] = await job.getQueryResults()
 
-    logger.info('Indexes from BigQuery fetched for ' + rows.length + ' pubkeys')
+        logger.info('Indexes from BigQuery fetched for ' + rows.length + ' pubkeys')
 
-    return rows
+        return rows
+    } catch (error) {
+        logger.error(error)
+        logger.info('Sleeping for 2 sec...')
+        await sleep(2000)
+        return await getValidatorIndexesFromBigQuery(val_pubkeys)
+    }
 }

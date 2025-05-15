@@ -50,7 +50,7 @@ export async function getFeeDistributorInputs() {
         periods.sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
 
         return {
-            fdAddress: ethers.utils.getAddress(fdAddress),
+            fdAddress: ethers.utils.getAddress(fdAddress.toLowerCase()),
 
             identityParams: {
                 referenceFeeDistributor: process.env.REFERENCE_FEE_DISTRIBUTOR!,
@@ -73,9 +73,12 @@ async function filterManualSetup(fds: Record<string, FdWithPeriodFromApi[]>): Pr
     Object.entries(fds).forEach(([ethAddress, detailsArray]) => {
         const filteredDetails = detailsArray.filter(details => {
             const validators = details.validators;
+            if (!validators) {
+                return false;
+            }
 
             const matchingProposers = Object.entries(proposers)
-              .filter(([, proposerDetails]) => proposerDetails.fee_recipient === ethAddress);
+              .filter(([, proposerDetails]) => proposerDetails.fee_recipient.toLowerCase() === ethAddress.toLowerCase());
 
             return matchingProposers.every(([pubkey]) => validators.includes(pubkey));
         });
